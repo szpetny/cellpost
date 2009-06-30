@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="main_menu">
+        <item>Inbox</item>
+        <item>Send e-mail</item>
+        <item>Drafts</item>
+        <item>Settings</item>
+    </string-array> 
+</resources>
