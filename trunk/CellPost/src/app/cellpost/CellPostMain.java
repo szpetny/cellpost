@@ -1,13 +1,9 @@
 package app.cellpost;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.Menu;
-import android.widget.ListAdapter;
-import android.widget.SimpleAdapter;
+import android.widget.ArrayAdapter;
 
 public class CellPostMain extends ListActivity {
 	private static final String TAG = "CellPostMain";
@@ -15,25 +11,20 @@ public class CellPostMain extends ListActivity {
 	// Menu item id
     public static final int MENU_ITEM_SELECT = Menu.FIRST;
 	
+    public final static String[] MAIN_MENU = { "Inbox",
+		   "Send e-mail",
+		   "Drafts",
+		   "Settings" };
+    
 	@Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
-        setContentView(R.layout.main_list_look);
 
-        ArrayList<HashMap<String, String>> lMainMenu = new ArrayList<HashMap<String, String>>();
-        lMainMenu.get(0).put("0", "Inbox");
-        lMainMenu.get(1).put("1", "Send e-mail");
-        lMainMenu.get(2).put("2", "Drafts");
-        lMainMenu.get(3).put("3", "Settings");
+        setListAdapter(new ArrayAdapter<String>(this,
+        		android.R.layout.simple_list_item_1, MAIN_MENU));
+        getListView().setTextFilterEnabled(true);
 
-        ListAdapter adapter = new SimpleAdapter(this, 
-        										lMainMenu,
-        										R.layout.main_list_look,
-        										new String[] {"0", "1", "2", "3"}, 
-        										new int[] { R.id.text1});
-
-        setListAdapter(adapter);
     }
 
 }
