@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="app.cellpost"
+      package="pl.app.cellpost"
       android:versionCode="1"
       android:versionName="1.0">
     <application android:icon="@drawable/icon" android:label="@string/app_name">
+        <provider android:name="DataProvider"
+            android:authorities="pl.app.cellpost.Data"
+        />
         <activity android:name=".CellPostMain"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <!--<action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                --><action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <activity android:name=".Inbox"
+                  android:label="@string/inbox">
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+                <!--<data android:mimeType="text/html" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" /> 
+            --></intent-filter>
         </activity>
     </application>
     <uses-sdk android:minSdkVersion="3" />
