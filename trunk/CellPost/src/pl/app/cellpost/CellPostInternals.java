@@ -1,7 +1,7 @@
 /**
  * 
  */
-package app.cellpost;
+package pl.app.cellpost;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -11,7 +11,7 @@ import android.provider.BaseColumns;
  *
  */
 public final class CellPostInternals {
-	public static final String AUTHORITY = "com.google.provider.NotePad";
+	public static final String AUTHORITY = "pl.app.cellpost.Data";
 	
     /**
      * The default sort order for tables
@@ -36,12 +36,17 @@ public final class CellPostInternals {
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of accounts.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.google.accounts";
+        public static final String CONTENT_TYPE = "text/plain";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} sub-directory of a single account.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.google.account";
+        public static final String CONTENT_ITEM_TYPE = "text/plain";
+        
+        /**
+         * The default sort order for this table
+         */
+        public static final String DEFAULT_SORT_ORDER = "modified DESC";
 
         /**
          * The email address
@@ -109,12 +114,17 @@ public final class CellPostInternals {
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of emails.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.google.emails";
+        public static final String CONTENT_TYPE = "text/plain";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} sub-directory of a single email.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.google.email";
+        public static final String CONTENT_ITEM_TYPE = "text/plain";
+        
+        /**
+         * The default sort order for this table
+         */
+        public static final String DEFAULT_SORT_ORDER = "modified DESC";
 
         /**
          * The 'From' field of the email

@@ -1,9 +1,12 @@
 /**
  * 
  */
-package app.cellpost;
+package pl.app.cellpost;
 
 import java.util.HashMap;
+
+import pl.app.cellpost.CellPostInternals.Accounts;
+import pl.app.cellpost.CellPostInternals.Emails;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -16,8 +19,6 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
-import app.cellpost.CellPostInternals.Accounts;
-import app.cellpost.CellPostInternals.Emails;
 
 /**
  * @author stellmal
