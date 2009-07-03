@@ -1,10 +1,13 @@
 package pl.app.cellpost;
 
+import pl.app.cellpost.CellPostInternals.Accounts;
 import pl.app.cellpost.CellPostInternals.Emails;
+import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,6 +16,14 @@ import android.widget.ListView;
 
 public class CellPostMain extends ListActivity implements OnTouchListener{
 	private static final String TAG = "CellPostMain";
+	
+	/**
+     * The columns we are interested in from the database for accounts
+     */
+    private static final String[] PROJECTION_ACCOUNTS = new String[] {
+            Accounts._ID, // 0
+            Accounts.ADDRESS, // 1
+    };
 
 	@Override
     protected void onCreate(Bundle savedInstanceState){
@@ -20,6 +31,30 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
         setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
 
         setContentView(R.layout.main_list_look);
+        
+        try {
+        	Cursor	cursor = managedQuery(Accounts.CONTENT_URI, PROJECTION_ACCOUNTS, null, null,
+        			Accounts.DEFAULT_SORT_ORDER);
+        } catch (SQLiteException e) {
+        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        	builder.setMessage("There is no configured e-mail accounts. " +
+        			" Do you want to configure your e-mail now?")
+        	       .setCancelable(false)
+        	       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        	           public void onClick(DialogInterface dialog, int id) {
+        	                dialog.cancel();
+        	                startActivity(new Intent(getApplicationContext(), AccountsConfig.class));
+        	           }
+        	       })
+        	       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+        	           public void onClick(DialogInterface dialog, int id) {
+        	                finish();
+        	           }
+        	       });
+        	AlertDialog alert = builder.create();
+        	alert.show();
+        	return;
+		}
         
         Intent intent = getIntent();
         if (intent.getAction() == null) {
@@ -33,7 +68,6 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
 	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Uri uri = ContentUris.withAppendedId(getIntent().getData(), id);
 		switch(position) {
 			case 0: System.out.println("Inbox");
 					String action = getIntent().getAction();
@@ -44,7 +78,9 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
 					break;
 			case 2: System.out.println("Drafts");
 					break;
-			case 3: System.out.println("Settings");
+			case 3: System.out.println("Sent");
+					break;
+			case 4: System.out.println("Settings");
 					break;
 		}
 		

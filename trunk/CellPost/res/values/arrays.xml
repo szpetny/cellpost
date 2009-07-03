@@ -4,6 +4,12 @@
         <item>Inbox</item>
         <item>Send e-mail</item>
         <item>Drafts</item>
+        <item>Sent</item>
         <item>Settings</item>
+    </string-array> 
+    
+    <string-array name="settings_menu">
+        <item>Accounts</item>
+        <item>User preferences</item>
     </string-array> 
 </resources>
