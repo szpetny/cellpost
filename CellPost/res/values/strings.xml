@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cell Post</string>
-    <string name="inbox">Welcome to your inbox!</string>
+    <string name="app_name">Welcome to Cell Post!</string>
+    <string name="inbox">Inbox</string>
+    <string name="acc_config">Accounts Manager</string>
 </resources>
