@@ -37,6 +37,22 @@
         
         <activity android:name=".AccountsConfig"
                   android:label="@string/acc_config">
+            <intent-filter>
+                <action android:name="pl.app.cellpost.FIRST_USAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <activity android:name=".AccountChoice"
+                  android:label="@string/choose_account_type">
+            <intent-filter>
+            	<action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
     </application>
     <uses-sdk android:minSdkVersion="3" />

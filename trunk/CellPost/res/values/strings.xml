@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Welcome to Cell Post!</string>
+    
+    <!-- Main Menu Options -->
     <string name="inbox">Inbox</string>
     <string name="acc_config">Accounts Manager</string>
+    
+    <!-- Accounts Config Menu Options -->
+    <string name="menu_add">Add</string>
+	<string name="menu_edit">Edit</string>
+	<string name="menu_delete">Delete</string>   
+	
+	<!-- Accounts Config Form -->
+    <string name="account_conf_address">Your e-mail address</string> 
+    <string name="account_conf_user">Your user name</string>
+    <string name="account_conf_pass">Your password</string>
+    <string name="account_conf_server">Server</string>
+    <string name="account_conf_port">Port</string>
+    <string name="account_conf_acc_type">Account type</string>
+    <string name="account_conf_security">Security</string>
+    <string name="account_conf_imap_path_pref">IMAP path prefix</string>
+    
+    <!-- Buttons -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="next">Next</string>
+    
+    <!-- Labels -->
+    <string name="choose_account_type">Choose account type:</string>
+
 </resources>

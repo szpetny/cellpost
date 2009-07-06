@@ -24,6 +24,8 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
             Accounts._ID, // 0
             Accounts.ADDRESS, // 1
     };
+    
+    private static final String ACTION_FIRST_USAGE = "pl.app.cellpost.FIRST_USAGE";
 
 	@Override
     protected void onCreate(Bundle savedInstanceState){
@@ -43,7 +45,7 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
         	       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
         	           public void onClick(DialogInterface dialog, int id) {
         	                dialog.cancel();
-        	                startActivity(new Intent(getApplicationContext(), AccountsConfig.class));
+        	                startActivity(new Intent(ACTION_FIRST_USAGE));
         	           }
         	       })
         	       .setNegativeButton("No", new DialogInterface.OnClickListener() {
