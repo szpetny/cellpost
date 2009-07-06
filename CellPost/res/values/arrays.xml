@@ -12,4 +12,24 @@
         <item>Accounts</item>
         <item>User preferences</item>
     </string-array> 
+    
+    <string-array name="account_types">
+        <item>POP3 account</item>
+        <item>IMAP account</item>
+    </string-array>
+    
+    <string-array name="account_security_options">
+        <item>None</item>
+        <item>SSL (if available)</item>
+        <item>TLS (always)</item>
+        <item>SSL (if available)</item>
+        <item>TLS (always)</item>
+    </string-array>
+    
+    <string-array name="delete_from_serv_options">
+        <item>Never</item>
+        <item>After 7 days</item>
+        <item>When I delete from Inbox</item>
+    </string-array>
+    
 </resources>

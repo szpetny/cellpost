@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent" 
+                android:layout_height="wrap_content"
+                android:padding="10px" >
+
+    <EditText android:id="@+id/address" 
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:text="@string/account_conf_address" 
+              android:background="@android:drawable/editbox_background" />
+
+    <EditText android:id="@+id/user" 
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:text="@string/account_conf_user" 
+              android:background="@android:drawable/editbox_background"
+              android:layout_below="@id/address" />
+
+    <EditText android:id="@+id/pass" 
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:text="@string/account_conf_pass" 
+              android:password="true"
+              android:background="@android:drawable/editbox_background"
+              android:layout_below="@id/user" />
+  
+    <EditText android:id="@+id/server" 
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:text="@string/account_conf_server" 
+              android:background="@android:drawable/editbox_background"
+              android:layout_below="@id/pass" />
+              
+    <EditText android:id="@+id/port" 
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:text="@string/account_conf_port" 
+              android:background="@android:drawable/editbox_background"
+              android:layout_below="@id/server" />
+              
+    
+              
+    <Spinner android:id="@+id/security" 
+    		 android:layout_height="wrap_content" 
+    		 android:layout_below="@id/port" 
+    		 android:layout_width="fill_parent" 
+    		 android:entries="@array/account_security_options" />
+    		 
+    <Spinner android:id="@+id/delete_emails" 
+    		 android:layout_height="wrap_content" 
+    		 android:layout_below="@id/security" 
+    		 android:layout_width="fill_parent" 
+    		 android:entries="@array/delete_from_serv_options" />  
+    
+    <Button android:id="@+id/ok" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:layout_below="@id/delete_emails"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="10px"
+            android:text="@string/ok" />
+
+    <Button android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/ok"
+            android:layout_alignTop="@id/ok"
+            android:text="@string/cancel" />
+
+</RelativeLayout>
