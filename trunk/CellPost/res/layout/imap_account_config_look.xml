@@ -45,10 +45,10 @@
     		 android:layout_width="fill_parent" 
     		 android:entries="@array/account_security_options" />
     		 
-    <Spinner android:id="@+id/imap_path_pref" 
-    		 android:layout_height="wrap_content" 
-    		 android:layout_below="@id/security" 
-    		 android:layout_width="fill_parent" />  
+    <EditText android:id="@+id/imap_path_pref" 
+    		  android:layout_height="wrap_content" 
+    		  android:layout_below="@id/security" 
+    		  android:layout_width="fill_parent" />  
     
     <Button android:id="@+id/ok" 
             android:layout_width="wrap_content" 

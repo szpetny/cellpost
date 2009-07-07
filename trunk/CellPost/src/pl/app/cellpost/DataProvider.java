@@ -63,7 +63,8 @@ public class DataProvider extends ContentProvider {
                     + Accounts.PORT + " INTEGER,"
                     + Accounts.ACCOUNT_TYPE + " TEXT,"
                     + Accounts.SECURITY + " TEXT,"
-                    + Accounts.IMAP_PATH_PREF + " TEXT"             
+                    + Accounts.IMAP_PATH_PREF + " TEXT"  
+                    + Accounts.DELETE_EMAILS + " TEXT"
                     + "); " 
                     + "CREATE TABLE " + EMAILS_TABLE_NAME + " ("
                     + Emails._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -235,6 +236,37 @@ public class DataProvider extends ContentProvider {
 		return 0;
 	}
 	
+	public boolean checkUnique(Uri uri, String[] projection, String selection) {
+		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+        switch (sUriMatcher.match(uri)) {
+        
+        case ACCOUNT_ID:
+            qb.setTables(ACCOUNTS_TABLE_NAME);
+            qb.setProjectionMap(sAccountsProjectionMap);
+            qb.appendWhere(Accounts._ID + "=" + uri.getPathSegments().get(1));
+            break;
+
+        case EMAIL_ID:
+            qb.setTables(EMAILS_TABLE_NAME);
+            qb.setProjectionMap(sEmailsProjectionMap);
+            qb.appendWhere(Emails._ID + "=" + uri.getPathSegments().get(1));
+            break;
+
+        default:
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+
+        // Get the database and run the query
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        Cursor c = qb.query(db, projection, selection, null, null, null, null);
+
+        if (c == null)
+        	return false;	
+        else
+        	return true;
+	}
+	
 	static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(CellPostInternals.AUTHORITY, "accounts", ACCOUNTS);
@@ -252,6 +284,7 @@ public class DataProvider extends ContentProvider {
         sAccountsProjectionMap.put(Accounts.ACCOUNT_TYPE, Accounts.ACCOUNT_TYPE);
         sAccountsProjectionMap.put(Accounts.SECURITY, Accounts.SECURITY);
         sAccountsProjectionMap.put(Accounts.IMAP_PATH_PREF, Accounts.IMAP_PATH_PREF);
+        sAccountsProjectionMap.put(Accounts.DELETE_EMAILS, Accounts.DELETE_EMAILS);
         
         sEmailsProjectionMap = new HashMap<String, String>();
         sEmailsProjectionMap.put(Emails._ID, Emails._ID);

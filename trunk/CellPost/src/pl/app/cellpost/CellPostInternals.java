@@ -95,6 +95,12 @@ public final class CellPostInternals {
          * <P>Type: TEXT</P>
          */
         public static final String IMAP_PATH_PREF = "imap_path_pref";
+        
+        /**
+         * Determines whether to delete e-mails from server
+         * <P>Type: TEXT</P>
+         */
+        public static final String DELETE_EMAILS = "delete_emails";
 
     }
 
