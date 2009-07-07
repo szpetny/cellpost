@@ -3,17 +3,22 @@
  */
 package pl.app.cellpost;
 
+import pl.app.cellpost.CellPostInternals.Accounts;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 /**
@@ -23,6 +28,7 @@ import android.widget.Toast;
 public class AccountsConfig extends Activity {
 	
 	private static final String ACTION_FIRST_USAGE = "pl.app.cellpost.FIRST_USAGE";
+	private Uri mUri;
 	
 	// Identifiers for our menu items.
     private static final int ADD_ID = Menu.FIRST;
@@ -128,11 +134,22 @@ public class AccountsConfig extends Activity {
 		        	return;
 				}
 				
+				EditText address = (EditText) findViewById(R.id.address);
+				final Editable addressVal = address.getText();
+				
 				Button okButton = (Button) findViewById(R.id.ok);
 				okButton.setOnClickListener(new OnClickListener() {
 					  public void onClick(View v) {
-						  //getContentResolver().insert(url, values);
+						  DataProvider dp = new DataProvider();
+						  if(dp.checkUnique(Accounts.CONTENT_URI, 
+								  new String[] {Accounts._ID, Accounts.ADDRESS}, addressVal.toString()))
+							  insertAccount();
 					  }
+
+					private void insertAccount() {
+						// TODO Auto-generated method stub
+						
+					}
 					});
 			}
 		}
