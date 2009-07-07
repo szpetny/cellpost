@@ -12,11 +12,6 @@ import android.provider.BaseColumns;
  */
 public final class CellPostInternals {
 	public static final String AUTHORITY = "pl.app.cellpost.Data";
-	
-    /**
-     * The default sort order for tables
-     */
-    public static final String DEFAULT_SORT_ORDER = "modified DESC";
 
     // This class cannot be instantiated
     private CellPostInternals() {}
@@ -46,7 +41,7 @@ public final class CellPostInternals {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "modified DESC";
+        public static final String DEFAULT_SORT_ORDER = "address ASC";
 
         /**
          * The email address

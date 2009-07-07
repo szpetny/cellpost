@@ -96,6 +96,15 @@ public class DataProvider extends ContentProvider {
     }
 
     private DatabaseHelper mOpenHelper;
+    
+	/* (non-Javadoc)
+	 * @see android.content.ContentProvider#onCreate()
+	 */
+    @Override
+    public boolean onCreate() {
+        mOpenHelper = new DatabaseHelper(getContext());
+        return true;
+    }
 
 	/* (non-Javadoc)
 	 * @see android.content.ContentProvider#delete(android.net.Uri, java.lang.String, java.lang.String[])
@@ -166,22 +175,73 @@ public class DataProvider extends ContentProvider {
 	}
 
 	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#onCreate()
-	 */
-	@Override
-	public boolean onCreate() {
-		mOpenHelper = new DatabaseHelper(getContext());
-        return true;
-	}
-
-	/* (non-Javadoc)
 	 * @see android.content.ContentProvider#query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String)
 	 */
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-
+        String orderBy;
+        
         switch (sUriMatcher.match(uri)) {
+        case ACCOUNTS:
+            qb.setTables(ACCOUNTS_TABLE_NAME);
+            qb.setProjectionMap(sAccountsProjectionMap);
+            orderBy = CellPostInternals.Accounts.DEFAULT_SORT_ORDER;
+            break;
+
+        case ACCOUNT_ID:
+            qb.setTables(ACCOUNTS_TABLE_NAME);
+            qb.setProjectionMap(sAccountsProjectionMap);
+            qb.appendWhere(Accounts._ID + "=" + uri.getPathSegments().get(1));
+            orderBy = CellPostInternals.Accounts.DEFAULT_SORT_ORDER;
+            break;
+            
+        case EMAILS:
+            qb.setTables(EMAILS_TABLE_NAME);
+            qb.setProjectionMap(sEmailsProjectionMap);
+            orderBy = CellPostInternals.Emails.DEFAULT_SORT_ORDER;
+            break;
+
+        case EMAIL_ID:
+            qb.setTables(EMAILS_TABLE_NAME);
+            qb.setProjectionMap(sEmailsProjectionMap);
+            qb.appendWhere(Emails._ID + "=" + uri.getPathSegments().get(1));
+            orderBy = CellPostInternals.Emails.DEFAULT_SORT_ORDER;
+            break;
+
+        default:
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+
+        // If no sort order is specified use the default
+        
+        if (TextUtils.isEmpty(sortOrder) == false) 
+            orderBy = sortOrder;
+
+        // Get the database and run the query
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, orderBy);
+
+        // Tell the cursor what uri to watch, so it knows when its source data changes
+        c.setNotificationUri(getContext().getContentResolver(), uri);
+        return c;
+    
+	}
+
+	/* (non-Javadoc)
+	 * @see android.content.ContentProvider#update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[])
+	 */
+	@Override
+	public int update(Uri uri, ContentValues values, String selection,
+			String[] selectionArgs) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	public boolean checkUnique(Uri uri, String[] projection, String selection) {
+		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+		switch (sUriMatcher.match(uri)) {
         case ACCOUNTS:
             qb.setTables(ACCOUNTS_TABLE_NAME);
             qb.setProjectionMap(sAccountsProjectionMap);
@@ -208,63 +268,14 @@ public class DataProvider extends ContentProvider {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
-        // If no sort order is specified use the default
-        String orderBy;
-        if (TextUtils.isEmpty(sortOrder)) {
-            orderBy = CellPostInternals.DEFAULT_SORT_ORDER;
-        } else {
-            orderBy = sortOrder;
-        }
-
-        // Get the database and run the query
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, orderBy);
-
-        // Tell the cursor what uri to watch, so it knows when its source data changes
-        c.setNotificationUri(getContext().getContentResolver(), uri);
-        return c;
-    
-	}
-
-	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[])
-	 */
-	@Override
-	public int update(Uri uri, ContentValues values, String selection,
-			String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
-	public boolean checkUnique(Uri uri, String[] projection, String selection) {
-		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-
-        switch (sUriMatcher.match(uri)) {
-        
-        case ACCOUNT_ID:
-            qb.setTables(ACCOUNTS_TABLE_NAME);
-            qb.setProjectionMap(sAccountsProjectionMap);
-            qb.appendWhere(Accounts._ID + "=" + uri.getPathSegments().get(1));
-            break;
-
-        case EMAIL_ID:
-            qb.setTables(EMAILS_TABLE_NAME);
-            qb.setProjectionMap(sEmailsProjectionMap);
-            qb.appendWhere(Emails._ID + "=" + uri.getPathSegments().get(1));
-            break;
-
-        default:
-            throw new IllegalArgumentException("Unknown URI " + uri);
-        }
-
         // Get the database and run the query
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor c = qb.query(db, projection, selection, null, null, null, null);
 
         if (c == null)
-        	return false;	
+        	return true;	
         else
-        	return true;
+        	return false;
 	}
 	
 	static {
@@ -301,5 +312,6 @@ public class DataProvider extends ContentProvider {
         sEmailsProjectionMap.put(Emails.EMAIL_DELIVERED_DATE, Emails.EMAIL_DELIVERED_DATE);
         sEmailsProjectionMap.put(Emails.WHICH_ACCOUNT, Emails.WHICH_ACCOUNT);
         }
+
 
 }
