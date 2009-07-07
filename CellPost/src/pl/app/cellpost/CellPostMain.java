@@ -7,7 +7,6 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,11 +32,10 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
         setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
 
         setContentView(R.layout.main_list_look);
-        
-        try {
-        	Cursor	cursor = managedQuery(Accounts.CONTENT_URI, PROJECTION_ACCOUNTS, null, null,
+               
+        Cursor	cursor = managedQuery(Accounts.CONTENT_URI, PROJECTION_ACCOUNTS, null, null,
         			Accounts.DEFAULT_SORT_ORDER);
-        } catch (SQLiteException e) {
+        if (cursor.getCount() == 0) {
         	AlertDialog.Builder builder = new AlertDialog.Builder(this);
         	builder.setMessage("There is no configured e-mail accounts. " +
         			" Do you want to configure your e-mail now?")
@@ -55,8 +53,8 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
         	       });
         	AlertDialog alert = builder.create();
         	alert.show();
-        	return;
-		}
+
+        }
         
         Intent intent = getIntent();
         if (intent.getAction() == null) {
