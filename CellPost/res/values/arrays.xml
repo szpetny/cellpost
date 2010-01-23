@@ -13,16 +13,16 @@
         <item>User preferences</item>
     </string-array> 
     
-    <string-array name="account_types">
-        <item>POP3 account</item>
-        <item>IMAP account</item>
+    <string-array name="account_conf_account_types">
+        <item>POP3</item>
+        <item>IMAP</item>
     </string-array>
     
-    <string-array name="account_security_options">
+    <string-array name="account_conf_security_options">
         <item>None</item>
         <item>SSL (if available)</item>
-        <item>TLS (always)</item>
-        <item>SSL (if available)</item>
+        <item>SSL (always)</item>
+        <item>TLS (if available)</item>
         <item>TLS (always)</item>
     </string-array>
     

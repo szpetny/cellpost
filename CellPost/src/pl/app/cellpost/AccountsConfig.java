@@ -5,9 +5,8 @@ package pl.app.cellpost;
 
 import pl.app.cellpost.CellPostInternals.Accounts;
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,10 +17,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 /**
- * @author stellmal
+ * @author Malgorzata Stellert
  *
  */
 public class AccountsConfig extends Activity {
@@ -36,8 +34,9 @@ public class AccountsConfig extends Activity {
 
 	private static final int GET_ACCOUNT_TYPE = 0;
 	
-	private static final String POP3_CONFIG = "POP3";
-	private static final String IMAP_CONFIG = "IMAP";
+	private static final String FORM1_DATA = "FORM1_DATA";
+	private static final String FORM2_DATA = "FORM2_DATA";
+	private static final String FORM3_DATA = "FORM3_DATA";
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +47,12 @@ public class AccountsConfig extends Activity {
 
 		if (ACTION_FIRST_USAGE.equals(action)) {
 		Context context = getApplicationContext();
-		CharSequence text = "Please press Menu > Add to configure at least one new e-mail account";
-		int duration = 30000;
+		addAccount();
+		/*CharSequence text = "Please press 'Menu > Add' to configure at least one new e-mail account";
+		int duration = 1000000;
 
 		Toast msg = Toast.makeText(context, text, duration);
-		msg.show();
+		msg.show();*/
 			
 		}
 
@@ -105,19 +105,35 @@ public class AccountsConfig extends Activity {
 		}
 
 		private void addAccount() {
-			startActivityForResult(new Intent(this, AccountChoice.class), GET_ACCOUNT_TYPE);
+			setContentView(R.layout.account_config_look);
+			EditText address = (EditText) findViewById(R.id.address);
+			final Editable addressVal = address.getText();
+			
+			Button okButton = (Button) findViewById(R.id.ok);
+			okButton.setOnClickListener(new OnClickListener() {
+				  public void onClick(View v) {
+					DataProvider dp = new DataProvider();
+					ContentValues accountData = new ContentValues();
+					accountData.put(Accounts.ADDRESS, addressVal.toString());
+					if(dp.checkUnique(Accounts.CONTENT_URI, 
+							  new String[] {Accounts._ID, Accounts.ADDRESS}, addressVal.toString()))
+						  dp.insert(Accounts.CONTENT_URI, accountData);
+				  }
+				});
+
 		}
 		
-		@Override
+		/*@Override
 		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+			
 			if (requestCode == GET_ACCOUNT_TYPE) {
 				String action = data.getAction();
 				
-				if (POP3_CONFIG.equals(action)) {
-					setContentView(R.layout.pop3_account_config_look);
+				if (FORM1_DATA.equals(action)) {
+					setContentView(R.layout.account_config_look_part2);
 				}
-				else if (IMAP_CONFIG.equals(action)) {
-					setContentView(R.layout.imap_account_config_look);
+				else if (FORM2_DATA.equals(action)) {
+					setContentView(R.layout.account_config_look_part3);
 				}
 				else {
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -135,8 +151,8 @@ public class AccountsConfig extends Activity {
 				
 				EditText address = (EditText) findViewById(R.id.address);
 				final Editable addressVal = address.getText();
-				
-				Button okButton = (Button) findViewById(R.id.ok);
+				*/
+				/*Button okButton = (Button) findViewById(R.id.next);
 				okButton.setOnClickListener(new OnClickListener() {
 					  public void onClick(View v) {
 						  DataProvider dp = new DataProvider();
@@ -151,5 +167,5 @@ public class AccountsConfig extends Activity {
 					}
 					});
 			}
-		}
+		}*/
 }

@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * @author stellmal
+ * @author Malgorzata Stellert
  *
  */
 public final class CellPostInternals {
