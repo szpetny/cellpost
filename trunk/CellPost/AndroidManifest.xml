@@ -45,7 +45,7 @@
                 <action android:name="android.intent.action.GET_CONTENT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
+        </activity><!--
         
         <activity android:name=".AccountChoice"
                   android:label="@string/choose_account_type">
@@ -54,6 +54,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-    </application>
+    --></application>
     <uses-sdk android:minSdkVersion="3" />
 </manifest> 

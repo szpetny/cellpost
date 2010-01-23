@@ -5,7 +5,7 @@
          android:layout_height="fill_parent"
          android:paddingLeft="8dp"
          android:paddingRight="8dp"
-         android:gravity="center">
+         android:gravity="center"><!--
  	
      <ListView android:id="@id/android:list"
                android:layout_width="fill_parent" 
@@ -15,4 +15,4 @@
                android:drawSelectorOnTop="false"
                android:choiceMode="singleChoice" />
     
- </LinearLayout>
+ --></LinearLayout>

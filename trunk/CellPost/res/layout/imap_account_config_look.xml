@@ -3,7 +3,7 @@
                 android:layout_width="fill_parent" 
                 android:layout_height="wrap_content"
                 android:padding="10px" >
-
+<!--
     <EditText android:id="@+id/address" 
               android:layout_width="fill_parent" 
               android:layout_height="wrap_content" 
@@ -45,10 +45,10 @@
     		 android:layout_width="fill_parent" 
     		 android:entries="@array/account_security_options" />
     		 
-    <EditText android:id="@+id/imap_path_pref" 
+   <EditText android:id="@+id/imap_path_pref" 
     		  android:layout_height="wrap_content" 
     		  android:layout_below="@id/security" 
-    		  android:layout_width="fill_parent" />  
+    		  android:layout_width="fill_parent" />   
     
     <Button android:id="@+id/ok" 
             android:layout_width="wrap_content" 
@@ -63,5 +63,5 @@
             android:layout_toLeftOf="@id/ok"
             android:layout_alignTop="@id/ok"
             android:text="@string/cancel" />
-
+-->
 </RelativeLayout>

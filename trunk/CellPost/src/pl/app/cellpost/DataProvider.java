@@ -3,14 +3,18 @@
  */
 package pl.app.cellpost;
 
+import java.net.URI;
 import java.util.HashMap;
 
 import pl.app.cellpost.CellPostInternals.Accounts;
 import pl.app.cellpost.CellPostInternals.Emails;
 
+import android.app.AlertDialog;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,7 +25,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 /**
- * @author stellmal
+ * @author Malgorzata Stellert
  *
  */
 public class DataProvider extends ContentProvider {
@@ -29,7 +33,7 @@ public class DataProvider extends ContentProvider {
 	private static final String TAG = "DataProvider";
 
     private static final String DATABASE_NAME = "cell_post.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String ACCOUNTS_TABLE_NAME = "accounts";
     private static final String EMAILS_TABLE_NAME = "emails";
 
@@ -47,7 +51,7 @@ public class DataProvider extends ContentProvider {
      * This class helps open, create, and upgrade the database file.
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-
+    	
         DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -96,19 +100,13 @@ public class DataProvider extends ContentProvider {
     }
 
     private DatabaseHelper mOpenHelper;
-    
-	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#onCreate()
-	 */
+
     @Override
     public boolean onCreate() {
         mOpenHelper = new DatabaseHelper(getContext());
         return true;
     }
 
-	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#delete(android.net.Uri, java.lang.String, java.lang.String[])
-	 */
 	@Override
 	public int delete(Uri uri, String where, String[] whereArgs) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -142,9 +140,6 @@ public class DataProvider extends ContentProvider {
         return count;
 	}
 
-	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#getType(android.net.Uri)
-	 */
 	@Override
 	public String getType(Uri uri) {
 		switch (sUriMatcher.match(uri)) {
@@ -165,18 +160,41 @@ public class DataProvider extends ContentProvider {
         }
 	}
 
-	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#insert(android.net.Uri, android.content.ContentValues)
-	 */
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
-		return null;
+		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        Uri newUri = null;
+        int result;
+        switch (sUriMatcher.match(uri)) {
+        
+        case ACCOUNT_ID:
+        	
+        	String accountId = uri.getPathSegments().get(1);
+            if ((result = (int) db.insert(ACCOUNTS_TABLE_NAME, null, values)) != -1) {
+            	newUri = Uri.withAppendedPath(uri, "ble");
+            }
+            else {
+            	AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+	        	builder.setMessage("Trying to save your accont configuration failed for unknown reasons. Sorry.")
+		       .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                dialog.cancel();
+		           }
+		       });}
+            break;
+            
+        case EMAIL_ID:
+            
+            break;
+
+        default:
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+
+        getContext().getContentResolver().notifyChange(uri, null);
+        return newUri;
 	}
 
-	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String)
-	 */
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
@@ -228,9 +246,6 @@ public class DataProvider extends ContentProvider {
     
 	}
 
-	/* (non-Javadoc)
-	 * @see android.content.ContentProvider#update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[])
-	 */
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
@@ -250,7 +265,7 @@ public class DataProvider extends ContentProvider {
         case ACCOUNT_ID:
             qb.setTables(ACCOUNTS_TABLE_NAME);
             qb.setProjectionMap(sAccountsProjectionMap);
-            qb.appendWhere(Accounts._ID + "=" + uri.getPathSegments().get(1));
+            qb.appendWhere(Accounts.ADDRESS + "=" + selection);
             break;
             
         case EMAILS:
@@ -273,9 +288,9 @@ public class DataProvider extends ContentProvider {
         Cursor c = qb.query(db, projection, selection, null, null, null, null);
 
         if (c == null)
-        	return true;	
+        	return false;	
         else
-        	return false;
+        	return true;
 	}
 	
 	static {

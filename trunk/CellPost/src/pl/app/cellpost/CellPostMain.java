@@ -37,7 +37,7 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
         			Accounts.DEFAULT_SORT_ORDER);
         if (cursor.getCount() == 0) {
         	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        	builder.setMessage("There is no configured e-mail accounts. " +
+        	builder.setMessage("There is no configured e-mail account. " +
         			" Do you want to configure your e-mail now?")
         	       .setCancelable(false)
         	       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
