@@ -1,13 +1,12 @@
 package pl.app.cellpost;
 
-import pl.app.cellpost.CellPostInternals.Accounts;
-import pl.app.cellpost.CellPostInternals.Emails;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -15,14 +14,6 @@ import android.widget.ListView;
 
 public class CellPostMain extends ListActivity implements OnTouchListener{
 	private static final String TAG = "CellPostMain";
-	
-	/**
-     * The columns we are interested in from the database for accounts
-     */
-    private static final String[] PROJECTION_ACCOUNTS = new String[] {
-            Accounts._ID, // 0
-            Accounts.ADDRESS, // 1
-    };
     
     private static final String ACTION_FIRST_USAGE = "pl.app.cellpost.FIRST_USAGE";
 
@@ -32,36 +23,36 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
         setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
 
         setContentView(R.layout.main_list_look);
-               
-        Cursor	cursor = managedQuery(Accounts.CONTENT_URI, PROJECTION_ACCOUNTS, null, null,
-        			Accounts.DEFAULT_SORT_ORDER);
-        if (cursor.getCount() == 0) {
-        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        	builder.setMessage("There is no configured e-mail account. " +
+        DbAdapter da = new DbAdapter(this);      
+        da.open();
+        Cursor	cursor = da.fetchAllAccounts();
+        if (cursor != null && cursor.getCount() == 0) {
+        	new AlertDialog.Builder(this).setMessage("There is no configured e-mail account. " +
         			" Do you want to configure your e-mail now?")
         	       .setCancelable(false)
-        	       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-        	           public void onClick(DialogInterface dialog, int id) {
-        	                dialog.cancel();
-        	                startActivity(new Intent(ACTION_FIRST_USAGE));
-        	           }
+        	       .setPositiveButton("Yes", 
+        	    	   new DialogInterface.OnClickListener() {
+	        	           public void onClick(DialogInterface dialog, int id) {
+	        	        	   startActivity(new Intent(ACTION_FIRST_USAGE));
+	        	                //dialog.cancel();
+	        	                
+	        	           }
         	       })
         	       .setNegativeButton("No", new DialogInterface.OnClickListener() {
         	           public void onClick(DialogInterface dialog, int id) {
         	                finish();
         	           }
-        	       });
-        	AlertDialog alert = builder.create();
-        	alert.show();
+        	       }).show();
 
         }
         
         Intent intent = getIntent();
         if (intent.getAction() == null) {
+        	Log.i("Intent", "wow intent " + intent);
             intent.setAction(Intent.ACTION_PICK);
         }
         if (intent.getData() == null) {
-            intent.setData(Emails.CONTENT_URI);
+   //         intent.setData(Emails.CONTENT_URI);
         }
                 
     }
@@ -86,10 +77,9 @@ public class CellPostMain extends ListActivity implements OnTouchListener{
 		
 	}
 
-	public boolean onTouch(View v, MotionEvent event) {
+	public boolean onTouch(View arg0, MotionEvent arg1) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 	
 }
