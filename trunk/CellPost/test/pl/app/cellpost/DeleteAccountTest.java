@@ -1,5 +1,6 @@
 package pl.app.cellpost;
 
+import pl.app.cellpost.common.DbAdapter;
 import android.test.AndroidTestCase;
 import android.util.Log;
 

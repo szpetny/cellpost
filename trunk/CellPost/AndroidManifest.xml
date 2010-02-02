@@ -10,21 +10,26 @@
         -->
         <uses-library android:name="android.test.runner" />
         
-        <activity android:name=".CellPostMain"
+        <activity android:name=".activities.main.CellPostMain"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <!--<action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
-                --><action android:name="android.intent.action.PICK" />
+            	<action android:name="pl.app.cellpost.MAIN_SCREEN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        --></activity>
        
-        <activity android:name=".Inbox"
+        <activity android:name=".activities.emails.Inbox"
                   android:label="@string/inbox">
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
@@ -38,7 +43,7 @@
             --></intent-filter>
         </activity>
         
-        <activity android:name=".AccountsConfig"
+        <activity android:name=".activities.accounts.AccountsConfig"
                   android:label="@string/acc_config">
             <intent-filter>
                 <action android:name="pl.app.cellpost.FIRST_USAGE" />
@@ -48,7 +53,17 @@
                 <action android:name="android.intent.action.GET_CONTENT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        --></activity><!--
+        --></activity>
+        
+        <activity android:name=".activities.accounts.AccountsList"
+                  android:label="@string/acc_config">
+            <intent-filter>
+                <action android:name="pl.app.cellpost.ACTION_LIST_ACCOUNTS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <!--
         
         <activity android:name=".AccountChoice"
                   android:label="@string/choose_account_type">

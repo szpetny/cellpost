@@ -1,27 +1,33 @@
 /**
  * 
  */
-package pl.app.cellpost;
+package pl.app.cellpost.common;
 
 /**
  * @author szpetny
  *
  */
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 
-import pl.app.cellpost.CellPostInternals.Accounts;
-import pl.app.cellpost.CellPostInternals.Emails;
+import pl.app.cellpost.common.CellPostInternals.Accounts;
+import pl.app.cellpost.common.CellPostInternals.Emails;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class DbAdapter {
 
     private static final String DATABASE_NAME = "cellpost.db";
+    private static final String DATABASE_PATH = "/data/data/pl.app.cellpost/databases/";
     private static final int DATABASE_VERSION = 3;
     private static final String ACCOUNTS_TABLE_NAME = "accounts";
     private static final String EMAILS_TABLE_NAME = "emails";
@@ -39,9 +45,9 @@ public class DbAdapter {
 
 	private static final String TAG = "DbAdapter";
 	private DatabaseHelper dbHelper;
-	private SQLiteDatabase db;
+	private static SQLiteDatabase db;
 
-	private final Context ctx;
+	private static Context ctx;
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -51,7 +57,7 @@ public class DbAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + ACCOUNTS_TABLE_NAME + " ("
+            /*db.execSQL("CREATE TABLE " + ACCOUNTS_TABLE_NAME + " ("
                     + Accounts._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + Accounts.ADDRESS + " TEXT,"
                     + Accounts.USER + " TEXT,"
@@ -79,7 +85,7 @@ public class DbAdapter {
                     + Emails.WHICH_ACCOUNT + " TEXT "
                     + "CONSTRAINT FOREIGN KEY (" + Emails.WHICH_ACCOUNT + ") "
                     + "REFERENCES " + ACCOUNTS_TABLE_NAME + "(" + Accounts._ID + ") "
-                    + ");");
+                    + ");");*/
         }
 
         @Override
@@ -90,6 +96,117 @@ public class DbAdapter {
             		  + "DROP TABLE IF EXISTS emails");
             onCreate(db);
         }
+        
+        public void createDataBase() throws IOException{
+        	 
+        	boolean dbExist = checkDataBase();
+     
+        	if(dbExist){
+        		//do nothing - database already exist
+        	}else{
+     
+        		//By calling this method and empty database will be created into the default system path
+                   //of your application so we are gonna be able to overwrite that database with our database.
+            	this.getReadableDatabase();
+     
+            	try {
+     
+        			copyDataBase();
+     
+        		} catch (IOException e) {
+     
+            		throw new Error("Error copying database");
+     
+            	}
+        	}
+     
+        }
+        
+        private boolean checkDataBase(){
+        	 
+        	SQLiteDatabase checkDB = null;
+     
+        	try{
+        		String myPath = DATABASE_PATH + DATABASE_NAME;
+        		checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+     
+        	}catch(SQLiteException e){
+     
+        		//database does't exist yet.
+     
+        	}
+     
+        	if(checkDB != null){
+     
+        		checkDB.close();
+     
+        	}
+     
+        	return checkDB != null ? true : false;
+        }
+        
+        private void copyDataBase() throws IOException{
+        	 
+        	//Open your local db as the input stream
+        	InputStream myInput = ctx.getAssets().open(DATABASE_NAME);
+     
+        	// Path to the just created empty db
+        	String outFileName = DATABASE_PATH + DATABASE_NAME;
+     
+        	//Open the empty db as the output stream
+        	OutputStream myOutput = new FileOutputStream(outFileName);
+     
+        	//transfer bytes from the inputfile to the outputfile
+        	byte[] buffer = new byte[1024];
+        	int length;
+        	while ((length = myInput.read(buffer))>0){
+        		myOutput.write(buffer, 0, length);
+        	}
+     
+        	//Close the streams
+        	myOutput.flush();
+        	myOutput.close();
+        	myInput.close();
+     
+        }
+     
+        public void openDataBase() throws SQLException{
+        	boolean dbExist = checkDataBase();
+        	String myPath = DATABASE_PATH + DATABASE_NAME;
+        	if(!dbExist){
+     
+        		//By calling this method and empty database will be created into the default system path
+                   //of your application so we are gonna be able to overwrite that database with our database.
+            	this.getReadableDatabase();
+     
+            	try {
+     
+        			copyDataBase();
+     
+        		} catch (IOException e) {
+     
+            		throw new Error("Error copying database");
+     
+            	}
+        	}
+        	//Open the database
+        	 db = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+           
+     
+        }
+     
+        @Override
+    	public synchronized void close() {
+     
+        	    if(db != null)
+        	    	db.close();
+     
+        	    super.close();
+     
+    	}
+
+
+
 	}
 
 	/**
@@ -113,6 +230,7 @@ public class DbAdapter {
 	*/
 	public DbAdapter open() throws SQLException {
 		dbHelper = new DatabaseHelper(ctx);
+		dbHelper.openDataBase();
 		db = dbHelper.getWritableDatabase();
 		return this;
 	}
@@ -201,14 +319,31 @@ public class DbAdapter {
 	* @return true if the value is unique, false otherwise
 	*/
 	public boolean checkUnique(String accountName) {
-		
-		if (db.query(ACCOUNTS_TABLE_NAME, new String[] {ACCOUNT_NAME}, ACCOUNT_NAME + "=" + accountName, 
-				null, null, null, null, null)== null)
-			return true;
-		else
-			return false;
+		if (checkEmpty() == false) {
+			Cursor c = null;
+			try {
+				c = db.query(ACCOUNTS_TABLE_NAME, new String[] {ACCOUNT_NAME}, ACCOUNT_NAME + "=" + accountName, 
+						null, null, null, null, null);
+				
+			} catch (SQLiteException sqle) {
+				throw new SQLException("CHUJ!");
+			}
+			if (c == null)
+				return true;
+			else
+				return false;
+		}
+		else return false;
 	}
 	
+	public boolean checkEmpty() {
+		try {
+			return db.rawQuery("PRAGMA table_info( accounts );", null) == null; 
+			
+		} catch (SQLiteException sqle) {
+			throw new SQLException("CHUJ!");
+		}
+	}
 	
 	static {
 	    sAccountsProjectionMap = new HashMap<String, String>();
