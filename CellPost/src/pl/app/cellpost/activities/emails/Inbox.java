@@ -1,9 +1,10 @@
 /**
  * 
  */
-package pl.app.cellpost;
+package pl.app.cellpost.activities.emails;
 
-import pl.app.cellpost.CellPostInternals.Emails;
+import pl.app.cellpost.R;
+import pl.app.cellpost.common.CellPostInternals.Emails;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;

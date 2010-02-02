@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.app.cellpost;
+package pl.app.cellpost.common;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
