@@ -24,9 +24,6 @@ import android.widget.EditText;
  *
  */
 public class AccountsConfig extends Activity {
-	private DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-	
-	
 	private static final String ACTION_FIRST_USAGE = "pl.app.cellpost.FIRST_USAGE";
 	private static final String ACTION_MAIN_SCREEN = "pl.app.cellpost.MAIN_SCREEN";
 	
@@ -41,6 +38,7 @@ public class AccountsConfig extends Activity {
 		
 		final Intent intent = getIntent();
 		final String action = intent.getAction();
+		DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 		dbAdapter.open();
 		
 		if (ACTION_FIRST_USAGE.equals(action)) {	
@@ -113,6 +111,7 @@ public class AccountsConfig extends Activity {
 				  public void onClick(View v) {
 					ContentValues accountData = new ContentValues();
 					accountData.put(Accounts.ADDRESS, addressVal.toString());
+					DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 					if (firstTimeFlag == false) {
 						dbAdapter.checkUnique(addressVal.toString());
 					}

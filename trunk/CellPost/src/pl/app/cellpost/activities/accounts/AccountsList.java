@@ -27,8 +27,7 @@ import android.widget.SimpleCursorAdapter;
  *
  */
 public class AccountsList extends ListActivity {
-	private DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-	
+	private static final String ACTION_FIRST_USAGE = "pl.app.cellpost.FIRST_USAGE";
 	private static final String ACTION_MAIN_SCREEN = "pl.app.cellpost.MAIN_SCREEN";
 	
 	// Identifiers for our menu items.
@@ -39,12 +38,12 @@ public class AccountsList extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 		dbAdapter.open();
 		Cursor c = dbAdapter.fetchAllAccounts();
 		startManagingCursor(c);
 		ListAdapter adapter = new SimpleCursorAdapter(this, R.layout.accounts_list_look, c,                                    
-			            	new String[] {Accounts.ADDRESS} , new int[] {R.id.list});     
+			            	new String[] {Accounts.ADDRESS} , new int[] {R.id.listItem});     
 		setListAdapter(adapter);
 		
 
@@ -108,6 +107,7 @@ public class AccountsList extends ListActivity {
 				  public void onClick(View v) {
 					ContentValues accountData = new ContentValues();
 					accountData.put(Accounts.ADDRESS, addressVal.toString());
+					DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 					if (firstTimeFlag == false) {
 						dbAdapter.checkUnique(addressVal.toString());
 					}

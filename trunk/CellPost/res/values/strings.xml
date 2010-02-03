@@ -4,7 +4,8 @@
     
     <!-- Main Menu Options -->
     <string name="inbox">Inbox</string>
-    <string name="acc_config">Accounts Manager</string>
+    <string name="acc_list">Your e-mail accounts</string>
+    <string name="acc_config">Account Manager</string>
     
     <!-- Accounts Config Menu Options -->
     <string name="menu_add">Add</string>
