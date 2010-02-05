@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent" 
-                android:layout_height="fill_parent"
-                android:padding="10px"
-                android:isScrollContainer="true" 
-                android:scrollbars="vertical"
-                android:scrollbarAlwaysDrawVerticalTrack="true" >
-	     <TextView android:id="@+id/listItem"
-	               android:layout_width="fill_parent" 
-	               android:layout_height="fill_parent"
-	               android:layout_weight="1"
-	               android:drawSelectorOnTop="false"
-	               android:choiceMode="singleChoice"/>
-</ScrollView>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_width="fill_parent" 
+     android:layout_height="fill_parent"
+     android:padding="10px"
+     android:isScrollContainer="true" 
+     android:scrollbars="vertical">
+		<ListView android:id="@+id/android:list"
+				  android:layout_width="fill_parent"
+				  android:layout_height="fill_parent"/>
+		<TextView android:id="@+id/android:empty"
+				  android:layout_width="wrap_content"
+				  android:layout_height="wrap_content"
+				  android:text="No Configured E-mail Accounts!"/>
+</LinearLayout>

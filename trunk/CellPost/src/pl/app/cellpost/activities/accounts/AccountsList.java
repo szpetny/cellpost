@@ -7,124 +7,119 @@ import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import android.app.ListActivity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.Editable;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 /**
  * @author Malgorzata Stellert
  *
  */
 public class AccountsList extends ListActivity {
-	private static final String ACTION_FIRST_USAGE = "pl.app.cellpost.FIRST_USAGE";
-	private static final String ACTION_MAIN_SCREEN = "pl.app.cellpost.MAIN_SCREEN";
-	
-	// Identifiers for our menu items.
-    private static final int ADD_ID = Menu.FIRST;
-    private static final int EDIT_ID = Menu.FIRST + 1;
-    private static final int DELETE_ID = Menu.FIRST + 2;
-   
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-		dbAdapter.open();
-		Cursor c = dbAdapter.fetchAllAccounts();
-		startManagingCursor(c);
-		ListAdapter adapter = new SimpleCursorAdapter(this, R.layout.accounts_list_look, c,                                    
-			            	new String[] {Accounts.ADDRESS} , new int[] {R.id.listItem});     
-		setListAdapter(adapter);
 		
-
-	}
+		// Ids for menus items.
+	    private static final int ADD_ID = Menu.FIRST;
+	    private static final int EDIT_ID = Menu.FIRST + 1;
+	    private static final int DELETE_ID = Menu.FIRST + 2;
+	   
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+	        setContentView(R.layout.accounts_list_look);
+			listAccounts();
 	
-	 @Override
-	    public boolean onCreateOptionsMenu(Menu menu) {
-	        super.onCreateOptionsMenu(menu);
-
-	        menu.add(0, ADD_ID, 0, R.string.menu_add)
-	                    .setShortcut('0', 'a')
-	                    .setIcon(android.R.drawable.ic_menu_add);
-	        
-	        menu.add(0, EDIT_ID, 0, R.string.menu_edit)
-            			.setShortcut('1', 'e')
-            			.setIcon(android.R.drawable.ic_menu_edit);
-	       
-	        menu.add(0, DELETE_ID, 0, R.string.menu_delete)
-	                        .setShortcut('2', 'd')
-	                        .setIcon(android.R.drawable.ic_menu_delete);
-	     
-	        return true;
-	    }
+		}
+		
+		@Override
+		public boolean onCreateOptionsMenu(Menu menu) {
+		     super.onCreateOptionsMenu(menu);
+		     menu.add(0, ADD_ID, 0, R.string.menu_add)
+		         .setShortcut('0', 'a')
+		         .setIcon(android.R.drawable.ic_menu_add);	     
+		        return true;
+		}
+	
+		@Override
+		public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		     switch(item.getItemId()) {
+		        case ADD_ID:
+		        	addAccount();
+		            return true;
+		     }
+		     return super.onMenuItemSelected(featureId, item);
+		}
+		
+	    @Override
+		public void onCreateContextMenu(ContextMenu menu, View v,
+				ContextMenuInfo menuInfo) {
+			super.onCreateContextMenu(menu, v, menuInfo);
+			menu.add(0, EDIT_ID, 0, R.string.menu_edit);
+	        menu.add(1, DELETE_ID, 1, R.string.menu_delete);
+		}
 
 	    @Override
-	    public boolean onOptionsItemSelected(MenuItem item) {
-	        // Handle all of the possible menu actions.
-	        switch (item.getItemId()) {
-	        case ADD_ID:
-	            addAccount(false);
-	            break;
-	        case EDIT_ID:
-	            editAccount();
-	            break;
-	        case DELETE_ID:
-	            deleteAccount();
-	            break;
-	        }
-	        return super.onOptionsItemSelected(item);
+		public boolean onContextItemSelected(MenuItem item) {
+	    	AdapterContextMenuInfo info; 
+			switch(item.getItemId()) {
+			case EDIT_ID:		
+				info = (AdapterContextMenuInfo) item.getMenuInfo();
+				editAccount(info.id);
+		        return true;
+	    	case DELETE_ID:
+	    		info = (AdapterContextMenuInfo) item.getMenuInfo();
+	    		deleteAccount(info.id);
+		        return true;
+			}
+			return super.onContextItemSelected(item);
+		}
+	
+	    @Override
+	    protected void onListItemClick(ListView l, View v, int position, long id) {
+	        super.onListItemClick(l, v, position, id);
+	        editAccount(id);
 	    }
-
-		private void deleteAccount() {
-			// TODO Auto-generated method stub
+	    
+		private void deleteAccount(long accountId) {
+			DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
+			if (dbAdapter.deleteAccount(accountId)) {
+				listAccounts();
+			}
+			else {
+				Log.e("Failure", "Operation of deleting account failed!");
+			}
 			
 		}
 
-		private void editAccount() {
-			// TODO Auto-generated method stub
+		private void editAccount(long accountId) {
+			Intent intent = new Intent(this, AccountConfig.class);
+	        intent.putExtra(Accounts._ID, accountId);
+	        startActivity(intent);
 			
 		}
 
-		private void addAccount(final boolean firstTimeFlag) {
-			
-			setContentView(R.layout.account_config_look);
-			EditText address = (EditText) findViewById(R.id.address);
-			final Editable addressVal = address.getText();
-			
-			Button okButton = (Button) findViewById(R.id.ok);
-			Button cancelButton = (Button) findViewById(R.id.cancel);
-			okButton.setOnClickListener(new OnClickListener() {
-				  public void onClick(View v) {
-					ContentValues accountData = new ContentValues();
-					accountData.put(Accounts.ADDRESS, addressVal.toString());
-					DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-					if (firstTimeFlag == false) {
-						dbAdapter.checkUnique(addressVal.toString());
-					}
-					if (dbAdapter.createAccount(accountData) != -1) {
-						startActivity(new Intent(ACTION_MAIN_SCREEN));
-					}
-					else {
-					  Log.i("Failure", "Failed to save data!");
-					}
-				  }
-									  
-			});
-			cancelButton.setOnClickListener(new OnClickListener() {
-				  public void onClick(View v) {
-					finish();
-						  
-				  }
-			});
+		private void addAccount() {
+			startActivity(new Intent(this, AccountConfig.class));
 		}
+		
+		private void listAccounts() {
+			 	DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
+				dbAdapter.open();
+				Cursor c = dbAdapter.fetchAllAccounts();
+				startManagingCursor(c);
+				ListAdapter adapter = new SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.account_single_row, 
+						c, new String[]{Accounts.ADDRESS}, new int []{R.id.accountRow});     
+				setListAdapter(adapter);
+				registerForContextMenu(getListView());
+		}
+		
 }

@@ -28,7 +28,7 @@ public class Inbox extends ListActivity {
      */
     private static final String[] PROJECTION_EMAILS = new String[] {
             Emails._ID, // 0
-            Emails.FROM, // 1
+            Emails.SENDER, // 1
             Emails.SUBJECT, // 2
     };
 
