@@ -11,7 +11,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import pl.app.cellpost.common.CellPostInternals.Emails;
@@ -29,19 +28,6 @@ public class DbAdapter {
     private static final String DATABASE_NAME = "cellpost.db";
     private static final String DATABASE_PATH = "/data/data/pl.app.cellpost/databases/";
     private static final int DATABASE_VERSION = 3;
-    private static final String ACCOUNTS_TABLE_NAME = "accounts";
-    private static final String EMAILS_TABLE_NAME = "emails";
-
-    private static HashMap<String, String> sAccountsProjectionMap;
-    private static HashMap<String, String> sEmailsProjectionMap;
-
-    private static final String ACCOUNTS = "";
-    private static final String ACCOUNT_ID = "_ID";
-    private static final String ACCOUNT_NAME = "address";
-    private static final String EMAILS = "";
-    private static final String EMAIL_ID = "_ID";
-    private static final String EMAIL_TITLE = "SUBJECT";
-
 
 	private static final String TAG = "DbAdapter";
 	private DatabaseHelper dbHelper;
@@ -57,57 +43,15 @@ public class DbAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            /*db.execSQL("CREATE TABLE " + ACCOUNTS_TABLE_NAME + " ("
-                    + Accounts._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + Accounts.ADDRESS + " TEXT,"
-                    + Accounts.USER + " TEXT,"
-                    + Accounts.PASS + " TEXT,"
-                    + Accounts.SERVER + " TEXT,"
-                    + Accounts.PORT + " INTEGER,"
-                    + Accounts.ACCOUNT_TYPE + " TEXT,"
-                    + Accounts.SECURITY + " TEXT,"
-                    + Accounts.IMAP_PATH_PREF + " TEXT"  
-                    + Accounts.DELETE_EMAILS + " TEXT"
-                    + "); " 
-                    + "CREATE TABLE " + EMAILS_TABLE_NAME + " ("
-                    + Emails._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + Emails.FROM + " TEXT,"
-                    + Emails.TO + " TEXT,"
-                    + Emails.CC + " TEXT,"
-                    + Emails.BCC + " TEXT,"
-                    + Emails.SUBJECT + " TEXT,"
-                    + Emails.CONTENTS + " TEXT,"
-                    + Emails.ATTACHMENT + " BLOB,"
-                    + Emails.EMAIL_TYPE + " TEXT,"
-                    + Emails.EMAIL_CREATED_DATE + " INTEGER,"
-                    + Emails.EMAIL_MODIFIED_DATE + " INTEGER,"
-                    + Emails.EMAIL_DELIVERED_DATE + " INTEGER,"
-                    + Emails.WHICH_ACCOUNT + " TEXT "
-                    + "CONSTRAINT FOREIGN KEY (" + Emails.WHICH_ACCOUNT + ") "
-                    + "REFERENCES " + ACCOUNTS_TABLE_NAME + "(" + Accounts._ID + ") "
-                    + ");");*/
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS accounts; "
-            		  + "DROP TABLE IF EXISTS emails");
-            onCreate(db);
+        	
         }
         
         public void createDataBase() throws IOException{
         	 
         	boolean dbExist = checkDataBase();
      
-        	if(dbExist){
-        		//do nothing - database already exist
-        	}else{
-     
-        		//By calling this method and empty database will be created into the default system path
-                   //of your application so we are gonna be able to overwrite that database with our database.
-            	this.getReadableDatabase();
+        	if(!dbExist){
+        		this.getReadableDatabase();
      
             	try {
      
@@ -121,49 +65,49 @@ public class DbAdapter {
         	}
      
         }
+
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
+                    + newVersion + ", which will destroy all old data");
+            db.execSQL("DROP TABLE IF EXISTS accounts; "
+            		  + "DROP TABLE IF EXISTS emails");
+            try {
+				copyDataBase();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
         
-        private boolean checkDataBase(){
-        	 
+        private boolean checkDataBase(){       	 
         	SQLiteDatabase checkDB = null;
      
         	try{
         		String myPath = DATABASE_PATH + DATABASE_NAME;
-        		checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+        		checkDB = SQLiteDatabase. openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
      
         	}catch(SQLiteException e){
-     
-        		//database does't exist yet.
+        		Log.e("Failure", "Database does not exist");
      
         	}
      
-        	if(checkDB != null){
-     
+        	if(checkDB != null){     
         		checkDB.close();
-     
         	}
      
         	return checkDB != null ? true : false;
         }
         
         private void copyDataBase() throws IOException{
-        	 
-        	//Open your local db as the input stream
         	InputStream myInput = ctx.getAssets().open(DATABASE_NAME);
-     
-        	// Path to the just created empty db
         	String outFileName = DATABASE_PATH + DATABASE_NAME;
-     
-        	//Open the empty db as the output stream
         	OutputStream myOutput = new FileOutputStream(outFileName);
-     
-        	//transfer bytes from the inputfile to the outputfile
         	byte[] buffer = new byte[1024];
         	int length;
         	while ((length = myInput.read(buffer))>0){
         		myOutput.write(buffer, 0, length);
         	}
-     
-        	//Close the streams
         	myOutput.flush();
         	myOutput.close();
         	myInput.close();
@@ -174,38 +118,24 @@ public class DbAdapter {
         	boolean dbExist = checkDataBase();
         	String myPath = DATABASE_PATH + DATABASE_NAME;
         	if(!dbExist){
-     
-        		//By calling this method and empty database will be created into the default system path
-                   //of your application so we are gonna be able to overwrite that database with our database.
-            	this.getReadableDatabase();
-     
-            	try {
-     
+            	this.getReadableDatabase();   
+            	try {     
         			copyDataBase();
      
-        		} catch (IOException e) {
-     
-            		throw new Error("Error copying database");
-     
+        		} catch (IOException e) {     
+            		throw new Error("Error copying database");    
             	}
         	}
-        	//Open the database
         	 db = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
-           
-     
         }
      
         @Override
-    	public synchronized void close() {
-     
+    	public synchronized void close() { 
         	    if(db != null)
-        	    	db.close();
-     
+        	    	db.close();   
         	    super.close();
      
     	}
-
-
 
 	}
 
@@ -216,7 +146,7 @@ public class DbAdapter {
 	* @param ctx the Context within which to work
 	*/
 	public DbAdapter(Context ctx) {
-		this.ctx = ctx;
+		DbAdapter.ctx = ctx;
 	}
 
 	/**
@@ -230,6 +160,11 @@ public class DbAdapter {
 	*/
 	public DbAdapter open() throws SQLException {
 		dbHelper = new DatabaseHelper(ctx);
+		try {
+			dbHelper.createDataBase();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		dbHelper.openDataBase();
 		db = dbHelper.getWritableDatabase();
 		return this;
@@ -249,7 +184,7 @@ public class DbAdapter {
 	* @return accountId or -1 if failed
 	*/
 	public long createAccount(ContentValues accountParams) {
-		return db.insert(ACCOUNTS_TABLE_NAME, null, accountParams);
+		return db.insert(Accounts.TABLE_NAME, null, accountParams);
 	}
 
 	/**
@@ -259,8 +194,8 @@ public class DbAdapter {
 	* @return true if deleted, false otherwise
 	*/
 	public boolean deleteAccount(long accountId) {	
-		Log.i("Delete called", "value__" + accountId);
-		return db.delete(ACCOUNTS_TABLE_NAME, ACCOUNT_ID + "=" + accountId, null) > 0;
+		Log.i(TAG, "value__" + accountId);
+		return db.delete(Accounts.TABLE_NAME, Accounts._ID + "=" + accountId, null) > 0;
 	}
 	
 	/**
@@ -269,7 +204,7 @@ public class DbAdapter {
 	* @return true if deleted, false otherwise
 	*/
 	public boolean deleteAllAccounts() {	
-		return db.delete(ACCOUNTS_TABLE_NAME, ACCOUNT_ID + "> 0", null) > 0;
+		return db.delete(Accounts.TABLE_NAME, Accounts._ID + "> 0", null) > 0;
 	}
 
 	/**
@@ -278,7 +213,7 @@ public class DbAdapter {
 	* @return Cursor over all accounts
 	*/
 	public Cursor fetchAllAccounts() {
-		return db.query(ACCOUNTS_TABLE_NAME, new String[] {ACCOUNT_ID, ACCOUNT_NAME}, 
+		return db.query(Accounts.TABLE_NAME, new String[] {"*"}, 
 				null, null, null, null, null);
 	}
 
@@ -291,8 +226,7 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAccount(long accountId) throws SQLException {
 	
-		Cursor cursor = db.query(true, ACCOUNTS_TABLE_NAME, new String[] {ACCOUNT_ID,
-				ACCOUNT_NAME}, ACCOUNT_ID + "=" + accountId, 
+		Cursor cursor = db.query(true, Accounts.TABLE_NAME, new String[] {"*"}, Accounts._ID + "=" + accountId, 
 				null, null, null, null, null);
 		if (cursor != null) {
 			cursor.moveToFirst();
@@ -309,7 +243,7 @@ public class DbAdapter {
 	* @return true if the account was successfully updated, false otherwise
 	*/
 	public boolean updateAccount(long accountId, ContentValues accountParams) {
-		return db. update(ACCOUNTS_TABLE_NAME, accountParams, ACCOUNT_ID + "=" + accountId, null) > 0;
+		return db. update(Accounts.TABLE_NAME, accountParams, Accounts._ID + "=" + accountId, null) > 0;
 	}
 	
 	/**
@@ -322,16 +256,17 @@ public class DbAdapter {
 		if (checkEmpty() == false) {
 			Cursor c = null;
 			try {
-				c = db.query(ACCOUNTS_TABLE_NAME, new String[] {ACCOUNT_NAME}, ACCOUNT_NAME + "=" + accountName, 
-						null, null, null, null, null);
-				
+				c = db.rawQuery("SELECT _ID, ADDRESS FROM accounts WHERE ADDRESS = %s", new String[] {accountName}); 				
 			} catch (SQLiteException sqle) {
 				throw new SQLException("CHUJ!");
 			}
-			if (c == null)
+			if (c == null) {
 				return true;
-			else
+			}				
+			else {
+				c.close();
 				return false;
+			}			
 		}
 		else return false;
 	}
@@ -345,32 +280,4 @@ public class DbAdapter {
 		}
 	}
 	
-	static {
-	    sAccountsProjectionMap = new HashMap<String, String>();
-	    sAccountsProjectionMap.put(Accounts._ID, Accounts._ID);
-	    sAccountsProjectionMap.put(Accounts.ADDRESS, Accounts.ADDRESS);
-	    sAccountsProjectionMap.put(Accounts.USER, Accounts.USER);
-	    sAccountsProjectionMap.put(Accounts.PASS, Accounts.PASS);
-	    sAccountsProjectionMap.put(Accounts.SERVER, Accounts.SERVER);
-	    sAccountsProjectionMap.put(Accounts.PORT, Accounts.PORT);
-	    sAccountsProjectionMap.put(Accounts.ACCOUNT_TYPE, Accounts.ACCOUNT_TYPE);
-	    sAccountsProjectionMap.put(Accounts.SECURITY, Accounts.SECURITY);
-	    sAccountsProjectionMap.put(Accounts.IMAP_PATH_PREF, Accounts.IMAP_PATH_PREF);
-	    sAccountsProjectionMap.put(Accounts.DELETE_EMAILS, Accounts.DELETE_EMAILS);
-	    
-	    sEmailsProjectionMap = new HashMap<String, String>();
-	    sEmailsProjectionMap.put(Emails._ID, Emails._ID);
-	    sEmailsProjectionMap.put(Emails.FROM, Emails.FROM);
-	    sEmailsProjectionMap.put(Emails.TO, Emails.TO);
-	    sEmailsProjectionMap.put(Emails.CC, Emails.CC);
-	    sEmailsProjectionMap.put(Emails.BCC, Emails.BCC);
-	    sEmailsProjectionMap.put(Emails.SUBJECT, Emails.SUBJECT);
-	    sEmailsProjectionMap.put(Emails.CONTENTS, Emails.CONTENTS);
-	    sEmailsProjectionMap.put(Emails.ATTACHMENT, Emails.ATTACHMENT);
-	    sEmailsProjectionMap.put(Emails.EMAIL_TYPE, Emails.EMAIL_TYPE);
-	    sEmailsProjectionMap.put(Emails.EMAIL_CREATED_DATE, Emails.EMAIL_CREATED_DATE);
-	    sEmailsProjectionMap.put(Emails.EMAIL_MODIFIED_DATE, Emails.EMAIL_MODIFIED_DATE);
-	    sEmailsProjectionMap.put(Emails.EMAIL_DELIVERED_DATE, Emails.EMAIL_DELIVERED_DATE);
-	    sEmailsProjectionMap.put(Emails.WHICH_ACCOUNT, Emails.WHICH_ACCOUNT);
-    }
 }

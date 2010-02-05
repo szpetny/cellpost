@@ -21,7 +21,7 @@
 	              android:background="@android:drawable/editbox_background" 
 	              android:layout_below="@id/addressLabel" />
 	
-		<!--<TextView android:id="@+id/userLabel" 
+		<TextView android:id="@+id/userLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
 	              android:text="@string/account_conf_user" 
@@ -144,10 +144,10 @@
 	    		 
 	    		 
 		
-		--><Button android:id="@+id/ok"
+		<Button android:id="@+id/ok"
 	    		android:layout_width="100px" 
 	            android:layout_height="wrap_content"
-	            						android:layout_below="@id/address"
+	            android:layout_below="@id/outgoingSecurity"
 	            android:layout_alignParentRight="true"
 	            android:layout_alignParentBottom="true"
 	            android:layout_marginLeft="10px"
@@ -159,7 +159,7 @@
 	    <Button android:id="@+id/cancel"
 	    		android:layout_width="100px" 
 	            android:layout_height="wrap_content"
-	           						 android:layout_below="@id/address"
+	           	android:layout_below="@id/outgoingSecurity"
 	            android:layout_marginLeft="10px"
 	            android:layout_marginTop="10px"
 	            android:text="@string/cancel" 
