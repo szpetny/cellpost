@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent" 
+                android:layout_height="fill_parent"
+                android:padding="10px"
+                android:isScrollContainer="true" 
+                android:scrollbars="vertical"
+                android:scrollbarAlwaysDrawVerticalTrack="true" >
+                
+	<RelativeLayout android:layout_width="fill_parent" 
+	                android:layout_height="wrap_content">   
+	                 
+	    <TextView android:id="@+id/toLabel" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:text="@string/mail_to" />
+	
+	    <EditText android:id="@+id/to" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:background="@android:drawable/editbox_background" 
+	              android:layout_below="@id/toLabel" />
+	              
+	    <TextView android:id="@+id/ccLabel" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:text="@string/mail_cc" 
+	              android:layout_below="@id/to"/>
+	
+	    <EditText android:id="@+id/cc" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:background="@android:drawable/editbox_background" 
+	              android:layout_below="@id/ccLabel" />
+	              
+	    <TextView android:id="@+id/bccLabel" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:text="@string/mail_bcc" 
+	              android:layout_below="@id/cc" />
+	
+	    <EditText android:id="@+id/bcc" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:background="@android:drawable/editbox_background" 
+	              android:layout_below="@id/bccLabel" />
+	              
+	    <TextView android:id="@+id/subjectLabel" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:text="@string/mail_subject" 
+	              android:layout_below="@id/bcc" />
+	
+	    <EditText android:id="@+id/subject" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:background="@android:drawable/editbox_background" 
+	              android:layout_below="@id/subjectLabel" />          
+	              
+	    <TextView android:id="@+id/contentsLabel" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:text="@string/mail_contents" 
+	              android:layout_below="@id/subject" />
+	
+	    <EditText android:id="@+id/contents" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="fill_parent" 
+	              android:minLines="5"
+	              android:background="@android:drawable/editbox_background" 
+	              android:layout_below="@id/contentsLabel" />                   
+	              
+	</RelativeLayout>
+</ScrollView>

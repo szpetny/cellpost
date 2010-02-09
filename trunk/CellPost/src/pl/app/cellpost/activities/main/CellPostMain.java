@@ -2,6 +2,7 @@ package pl.app.cellpost.activities.main;
 
 import pl.app.cellpost.R;
 import pl.app.cellpost.activities.accounts.AccountsList;
+import pl.app.cellpost.activities.mails.MailSender;
 import pl.app.cellpost.common.DbAdapter;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -51,7 +52,7 @@ public class CellPostMain extends ListActivity {
 		switch(position) {
 			case 0: System.out.println("Inbox");
 					break;
-			case 1: System.out.println("Send e-mail");
+			case 1: startActivity(new Intent(this, MailSender.class));
 					break;
 			case 2: System.out.println("Drafts");
 					break;
