@@ -1,5 +1,9 @@
 package pl.app.cellpost.activities.accounts;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Accounts;
@@ -143,7 +147,17 @@ public class AccountConfig extends Activity {
     	ContentValues accountData = new ContentValues();
 		accountData.put(Accounts.ADDRESS, addressText.getText().toString());
 		accountData.put(Accounts.USER, userText.getText().toString());
-		accountData.put(Accounts.PASS, passText.getText().toString());
+		String password = passText.getText().toString();
+		MessageDigest m;
+		String shyfrpassword = null;
+		try {
+			m = MessageDigest.getInstance( "MD5" );
+			m.update( password.getBytes(), 0, password.length() );
+			shyfrpassword = new BigInteger( 1, m.digest() ).toString( 16 );
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}		
+		accountData.put(Accounts.PASS, shyfrpassword);
 		accountData.put(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
 		accountData.put(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
 		accountData.put(Accounts.INCOMING_SECURITY, inSecurityAdapter.getItem(incomingSecurityOption.getSelectedItemPosition()).toString());

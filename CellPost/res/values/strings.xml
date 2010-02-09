@@ -2,16 +2,19 @@
 <resources>
     <string name="app_name">Cell Post!</string>
     
-    <!-- Main Menu Options -->
+    <!-- Activities Titles -->
     <string name="inbox">Inbox</string>
     <string name="acc_list">Your E-mail Accounts</string>
     <string name="acc_config">Account Manager</string>
     <string name="acc_add">Add Account Configuration</string>
+    <string name="mail_send">Send New E-mail Message</string>
     
-    <!-- Accounts Config Menu Options -->
+    <!-- Menu Options -->
     <string name="menu_add">Add</string>
 	<string name="menu_edit">Edit</string>
 	<string name="menu_delete">Delete</string>   
+	<string name="menu_send">Send</string>
+	<string name="menu_save">Save</string>
 	
 	<!-- Accounts Config Form -->
     <string name="account_conf_address">Your e-mail address</string> 
@@ -24,11 +27,19 @@
     <string name="account_conf_delete_emails">Delete from server</string>
     <string name="account_conf_imap_path_pref">IMAP path prefix</string>
     
+    <!-- Mail Sending Form -->
+    <string name="mail_to">To</string> 
+    <string name="mail_cc">Copy</string> 
+    <string name="mail_bcc">Hidden copy</string> 
+    <string name="mail_subject">Subject</string> 
+    <string name="mail_contents">Contents</string> 
+       
     <!-- Buttons -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
+    <string name="send">Send</string>
     
     <!-- Labels -->
     <string name="choose_account_type">Choose account type:</string>

@@ -4,5 +4,8 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="C:/Users/szpetny/Desktop/activation.jar"/>
+	<classpathentry kind="lib" path="C:/Users/szpetny/Desktop/additionnal.jar"/>
+	<classpathentry kind="lib" path="C:/Users/szpetny/Desktop/mail.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
