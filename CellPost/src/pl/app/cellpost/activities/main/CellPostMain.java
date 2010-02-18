@@ -25,8 +25,8 @@ public class CellPostMain extends ListActivity {
         DbAdapter da = new DbAdapter(this);      
         da.open();
         Cursor	cursor = da.fetchAllAccounts();
-        startManagingCursor(cursor);
-        if (cursor != null && cursor.getCount() == 0) {
+        if (cursor != null) {
+        	startManagingCursor(cursor);
         	new AlertDialog.Builder(this).setMessage("There is no configured e-mail account. " +
         			" Do you want to configure your e-mail now?")
         	       .setCancelable(false)
