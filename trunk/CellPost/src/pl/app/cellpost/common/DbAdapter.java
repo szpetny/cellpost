@@ -54,12 +54,11 @@ public class DbAdapter {
         		this.getReadableDatabase();
      
             	try {
-     
         			copyDataBase();
      
         		} catch (IOException e) {
      
-            		throw new Error("Error copying database");
+            		Log.e(TAG, "Error copying database");
      
             	}
         	}
@@ -85,10 +84,9 @@ public class DbAdapter {
      
         	try{
         		String myPath = DATABASE_PATH + DATABASE_NAME;
-        		checkDB = SQLiteDatabase. openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
-     
+        		checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
         	}catch(SQLiteException e){
-        		Log.e("Failure", "Database does not exist");
+        		Log.e(TAG, "Database does not exist");
      
         	}
      
@@ -163,7 +161,7 @@ public class DbAdapter {
 		try {
 			dbHelper.createDataBase();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(TAG, e.toString());
 		}
 		dbHelper.openDataBase();
 		db = dbHelper.getWritableDatabase();
