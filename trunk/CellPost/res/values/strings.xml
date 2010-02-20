@@ -21,9 +21,12 @@
     <string name="account_conf_user">Your user name</string>
     <string name="account_conf_pass">Password</string>
     <string name="account_conf_account_type">Account type</string>
-    <string name="account_conf_server">Server</string>
-    <string name="account_conf_port">Port</string>
-    <string name="account_conf_security">Security</string>
+    <string name="account_conf_in_server">Incoming server</string>
+    <string name="account_conf_out_server">Outgoing server</string>
+    <string name="account_conf_in_port">Incoming port</string>
+    <string name="account_conf_out_port">Outgoing port</string>
+    <string name="account_conf_in_security">Security for incoming server</string>
+    <string name="account_conf_out_security">Security for outgoing server</string>
     <string name="account_conf_delete_emails">Delete from server</string>
     <string name="account_conf_imap_path_pref">IMAP path prefix</string>
     

@@ -6,11 +6,13 @@ import android.util.Log;
 
 public class DeleteAccountTest extends AndroidTestCase {
 	
+	private static final String TAG = "DeleteAccountTest";
+	
 	public void  testAndroidTestCaseSetupProperly  () {
 		DbAdapter da = new DbAdapter(getContext().getApplicationContext());
-		da.open();
+		//da.open();
 		if (da.deleteAllAccounts())
-			Log.i("TESTING", "TEST PASSED!!!!!!!!!!!!!!!!");
+			Log.i(TAG, "TEST PASSED!!!!!!!!!!!!!!!!");
 		da.close();
 	}
 	

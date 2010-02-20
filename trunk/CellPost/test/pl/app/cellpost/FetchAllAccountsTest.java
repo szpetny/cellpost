@@ -9,7 +9,7 @@ public class FetchAllAccountsTest extends AndroidTestCase {
 	private final String TAG = "TESTING FetchAllAccountsTest";
 	public void  testAndroidTestCaseSetupProperly  () {
 		DbAdapter da = new DbAdapter(getContext().getApplicationContext());
-		da.open();
+		//da.open();
 		Cursor c = da.fetchAllAccounts();
 		if (c != null) {
 			for (int i = 0; i < c.getColumnNames().length; i++)
