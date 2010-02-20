@@ -7,11 +7,6 @@ package pl.app.cellpost.common;
  * @author szpetny
  *
  */
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import pl.app.cellpost.common.CellPostInternals.Emails;
 import android.content.ContentValues;
@@ -26,13 +21,13 @@ import android.util.Log;
 public class DbAdapter {
 
     private static final String DATABASE_NAME = "cellpost.db";
-    private static final String DATABASE_PATH = "/data/data/pl.app.cellpost/databases/";
     private static final int DATABASE_VERSION = 3;
 
 	private static final String TAG = "DbAdapter";
 	private DatabaseHelper dbHelper;
 	private static SQLiteDatabase db;
 
+	@SuppressWarnings("unused")
 	private static Context ctx;
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -40,99 +35,34 @@ public class DbAdapter {
 		DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		}
+		
 
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-        	
-        }
+		@Override
+		public void onCreate(SQLiteDatabase db) {
+			db.execSQL("CREATE TABLE accounts (DEFAULT_ACCOUNT NUMERIC, _id INTEGER PRIMARY KEY, ADDRESS TEXT, " +
+					"USER TEXT, PASS TEXT, ACCOUNT_TYPE TEXT, INCOMING_SERVER TEXT, INCOMING_PORT NUMERIC, " +
+					"INCOMING_SECURITY TEXT, DELETE_EMAILS NUMERIC, OUTGOING_SERVER TEXT, OUTGOING_PORT NUMERIC, OUTGOING_SECURITY TEXT); " +
+					"CREATE TABLE emails (_id INTEGER PRIMARY KEY, SENDER TEXT, ADDRESSEE TEXT, CC TEXT, BCC TEXT, SUBJECT TEXT, " +
+					"CONTENTS TEXT, ATTACHMENT BLOB, CREATE_DATE TEXT, MODIFY_DATE TEXT, DELIVER_DATE TEXT); " +
+					"INSERT INTO emails VALUES(1,'dummy',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL); " +
+					"CREATE UNIQUE INDEX account_id ON accounts(DEFAULT_ACCOUNT ASC); " +
+					"CREATE UNIQUE INDEX email_id ON emails(_id ASC);"); 
+		}
+		
+	    @Override
+	    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		    Log.w(TAG, "Upgrading database, this will drop tables and recreate.");
+		    db.execSQL("DROP TABLE IF EXISTS " + Accounts.TABLE_NAME);
+		    db.execSQL("DROP TABLE IF EXISTS " + Emails.TABLE_NAME);
+		    onCreate(db);
+	    }
         
-        public void createDataBase() throws IOException{
-        	 
-        	boolean dbExist = checkDataBase();
-     
-        	if(!dbExist){
-        		this.getReadableDatabase();
-     
-            	try {
-        			copyDataBase();
-     
-        		} catch (IOException e) {
-     
-            		Log.e(TAG, "Error copying database");
-     
-            	}
-        	}
-     
-        }
-
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS accounts; "
-            		  + "DROP TABLE IF EXISTS emails");
-            try {
-				copyDataBase();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-        }
-        
-        private boolean checkDataBase(){       	 
-        	SQLiteDatabase checkDB = null;
-     
-        	try{
-        		String myPath = DATABASE_PATH + DATABASE_NAME;
-        		checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
-        	}catch(SQLiteException e){
-        		Log.e(TAG, "Database does not exist");
-     
-        	}
-     
-        	if(checkDB != null){     
-        		checkDB.close();
-        	}
-     
-        	return checkDB != null ? true : false;
-        }
-        
-        private void copyDataBase() throws IOException{
-        	InputStream myInput = ctx.getAssets().open(DATABASE_NAME);
-        	String outFileName = DATABASE_PATH + DATABASE_NAME;
-        	OutputStream myOutput = new FileOutputStream(outFileName);
-        	byte[] buffer = new byte[1024];
-        	int length;
-        	while ((length = myInput.read(buffer))>0){
-        		myOutput.write(buffer, 0, length);
-        	}
-        	myOutput.flush();
-        	myOutput.close();
-        	myInput.close();
-     
-        }
-     
-        public void openDataBase() throws SQLException{
-        	boolean dbExist = checkDataBase();
-        	String myPath = DATABASE_PATH + DATABASE_NAME;
-        	if(!dbExist){
-            	this.getReadableDatabase();   
-            	try {     
-        			copyDataBase();
-     
-        		} catch (IOException e) {     
-            		throw new Error("Error copying database");    
-            	}
-        	}
-        	 db = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
-        }
      
         @Override
     	public synchronized void close() { 
         	    if(db != null)
         	    	db.close();   
         	    super.close();
-     
     	}
 
 	}
@@ -145,31 +75,17 @@ public class DbAdapter {
 	*/
 	public DbAdapter(Context ctx) {
 		DbAdapter.ctx = ctx;
+		if (dbHelper == null) {
+			dbHelper = new DatabaseHelper(ctx);
+			db = dbHelper.getWritableDatabase();
+		}
+		
 	}
 
-	/**
-	* Open the database. If it cannot be opened, try to create a new
-	* instance of the database. If it cannot be created, throw an exception to
-	* signal the failure
-	*
-	* @return this (self reference, allowing this to be chained in an
-	* initialization call)
-	* @throws SQLException if the database could be neither opened or created
-	*/
-	public DbAdapter open() throws SQLException {
-		dbHelper = new DatabaseHelper(ctx);
-		try {
-			dbHelper.createDataBase();
-		} catch (IOException e) {
-			Log.e(TAG, e.toString());
-		}
-		dbHelper.openDataBase();
-		db = dbHelper.getWritableDatabase();
-		return this;
-	}
-	
+
 	public void close() {
 		dbHelper.close();
+		dbHelper = null;
 	}
 
 
@@ -184,7 +100,7 @@ public class DbAdapter {
 	public long createAccount(ContentValues accountParams) {
 		return db.insert(Accounts.TABLE_NAME, null, accountParams);
 	}
-
+	
 	/**
 	* Delete the account settings with the given accountId
 	*
@@ -251,7 +167,6 @@ public class DbAdapter {
 	* @return true if the value is unique, false otherwise
 	*/
 	public boolean checkUnique(String accountName) {
-		if (checkEmpty() == false) {
 			Cursor c = null;
 			try {
 				c = db.rawQuery("SELECT _ID, ADDRESS FROM accounts WHERE ADDRESS = %s", new String[] {accountName}); 				
@@ -265,17 +180,77 @@ public class DbAdapter {
 				c.close();
 				return false;
 			}			
-		}
-		else return false;
+		
 	}
 	
-	public boolean checkEmpty() {
-		try {
-			return db.rawQuery("PRAGMA table_info( accounts );", null) == null; 
-			
-		} catch (SQLiteException sqle) {
-			throw new SQLException("CHUJ!");
-		}
+	/**
+	* Create a new email using the values provided in ContentValues. If the email is
+	* successfully created return the new emailId for that email, otherwise return
+	* a -1 to indicate failure.
+	*
+	* @param ContentValues containing email parameters
+	* @return emailId or -1 if failed
+	*/
+	public long createEmail(ContentValues emailParams) {
+		return db.insert(Emails.TABLE_NAME, null, emailParams);
 	}
 	
+	/**
+	* Delete the email settings with the given emailId
+	*
+	* @param emailId id of email settings to delete
+	* @return true if deleted, false otherwise
+	*/
+	public boolean deleteEmail(long emailId) {	
+		Log.i(TAG, "value__" + emailId);
+		return db.delete(Emails.TABLE_NAME, Emails._ID + "=" + emailId, null) > 0;
+	}
+	
+	/**
+	* Delete the all emails settings from database. Useful during testing.
+	*
+	* @return true if deleted, false otherwise
+	*/
+	public boolean deleteAllEmails() {	
+		return db.delete(Emails.TABLE_NAME, Emails._ID + "> 0", null) > 0;
+	}
+
+	/**
+	* Return a Cursor over the list of all emails in the database
+	*
+	* @return Cursor over all emails
+	*/
+	public Cursor fetchAllEmails() {
+		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
+				null, null, null, null, null);
+	}
+
+	/**
+	* Return a Cursor positioned at the email that matches the given emailId
+	*
+	* @param emailId id of email to retrieve
+	* @return Cursor positioned to matching email, if found
+	* @throws SQLException if email could not be found/retrieved
+	*/
+	public Cursor fetchEmail(long emailId) throws SQLException {
+	
+		Cursor cursor = db.query(true, Emails.TABLE_NAME, new String[] {"*"}, Emails._ID + "=" + emailId, 
+				null, null, null, null, null);
+		if (cursor != null) {
+			cursor.moveToFirst();
+		}
+		return cursor;	
+	}
+
+	/**
+	* Update the email settings using the details provided. The email to be updated is
+	* specified using the emailId, and it is altered to use the values passed in
+	*
+	* @param emailId id of email to update
+	* @param emailParams to set new email parameters 
+	* @return true if the email was successfully updated, false otherwise
+	*/
+	public boolean updateEmail(long emailId, ContentValues emailParams) {
+		return db. update(Emails.TABLE_NAME, emailParams, Emails._ID + "=" + emailId, null) > 0;
+	}
 }

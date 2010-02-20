@@ -61,7 +61,7 @@
 		<TextView android:id="@+id/incomingServerLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
-	              android:text="@string/account_conf_server" 
+	              android:text="@string/account_conf_in_server" 
 	              android:layout_below="@id/accountType" />
 		  
 	    <EditText android:id="@+id/incomingServer" 
@@ -73,7 +73,7 @@
 	    <TextView android:id="@+id/incomingPortLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
-	              android:text="@string/account_conf_port" 
+	              android:text="@string/account_conf_in_port" 
 	              android:layout_below="@id/incomingServer" />
 	              
 	    <EditText android:id="@+id/incomingPort" 
@@ -85,7 +85,7 @@
 	    <TextView android:id="@+id/incomingSecurityLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
-	              android:text="@string/account_conf_security" 
+	              android:text="@string/account_conf_in_security" 
 	              android:layout_below="@id/incomingPort" /> 
 	              
 	    <Spinner android:id="@+id/incomingSecurity" 
@@ -109,7 +109,7 @@
 	    <TextView android:id="@+id/outgoingServerLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
-	              android:text="@string/account_conf_server"
+	              android:text="@string/account_conf_out_server"
 	              android:layout_below="@id/deleteEmails" />
 		  
 	    <EditText android:id="@+id/outgoingServer" 
@@ -121,7 +121,7 @@
 	    <TextView android:id="@+id/outgoingPortLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
-	              android:text="@string/account_conf_port" 
+	              android:text="@string/account_conf_out_port" 
 	              android:layout_below="@id/outgoingServer" />
 	              
 	    <EditText android:id="@+id/outgoingPort" 
@@ -133,7 +133,7 @@
 	    <TextView android:id="@+id/outgoingSecurityLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
-	              android:text="@string/account_conf_security" 
+	              android:text="@string/account_conf_out_security" 
 	              android:layout_below="@id/outgoingPort" /> 
 	              
 	    <Spinner android:id="@+id/outgoingSecurity" 

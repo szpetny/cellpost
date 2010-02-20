@@ -4,6 +4,7 @@
 package pl.app.cellpost.activities.emails;
 
 import pl.app.cellpost.R;
+import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Emails;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -19,6 +20,8 @@ import android.widget.SimpleCursorAdapter;
 public class Inbox extends ListActivity {
 	private static final String TAG = "Inbox";
 	
+    private DbAdapter dbAdapter;
+    
     // Menu item ids
     public static final int MENU_ITEM_OPEN = Menu.FIRST;
     public static final int MENU_ITEM_DELETE = Menu.FIRST + 1;
@@ -38,6 +41,9 @@ public class Inbox extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		 super.onCreate(savedInstanceState);
+		 
+		 if (dbAdapter == null)
+	        	dbAdapter = new DbAdapter(this);
 		 
 	        setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
 
@@ -62,4 +68,26 @@ public class Inbox extends ListActivity {
 	        setListAdapter(adapter);
 		 
 	}
+	
+	@Override
+    protected void onPause() {
+        super.onPause();
+        //saveState();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	
+    	if (dbAdapter != null) {
+    		dbAdapter.close();
+    		dbAdapter = null;
+    	}
+    }
 }

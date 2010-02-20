@@ -27,6 +27,10 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
  */
 public class AccountsList extends ListActivity {
 		
+		private static final String TAG = "AccountsList";
+		
+		private DbAdapter dbAdapter;
+		
 		// Ids for menus items.
 	    private static final int ADD_ID = Menu.FIRST;
 	    private static final int EDIT_ID = Menu.FIRST + 1;
@@ -89,13 +93,28 @@ public class AccountsList extends ListActivity {
 	        editAccount(id);
 	    }
 	    
+	    @Override
+	    protected void onResume() {
+	        super.onResume();
+	        listAccounts();
+	    }
+	    
+	    @Override
+	    protected void onDestroy() {
+	    	super.onDestroy();
+	    	if (dbAdapter != null) {
+	    		dbAdapter.close();
+	    		dbAdapter = null;
+	    	}
+	    }
+	    
 		private void deleteAccount(long accountId) {
 			DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 			if (dbAdapter.deleteAccount(accountId)) {
 				listAccounts();
 			}
 			else {
-				Log.e("Failure", "Operation of deleting account failed!");
+				Log.e(TAG, "Operation of deleting account failed!");
 			}
 			
 		}
@@ -112,11 +131,11 @@ public class AccountsList extends ListActivity {
 		}
 		
 		private void listAccounts() {
-			 	DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-				dbAdapter.open();
+			if (dbAdapter == null)
+			    dbAdapter = new DbAdapter(this);
 				Cursor c = dbAdapter.fetchAllAccounts();
 				startManagingCursor(c);
-				ListAdapter adapter = new SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.account_single_row, 
+				ListAdapter adapter = new  SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.account_single_row, 
 						c, new String[]{Accounts.ADDRESS}, new int []{R.id.accountRow});     
 				setListAdapter(adapter);
 				registerForContextMenu(getListView());

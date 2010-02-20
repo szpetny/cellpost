@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -19,6 +20,8 @@ import android.widget.Spinner;
 
 public class AccountConfig extends Activity {
 
+	private static final String TAG = "AccountConfig";
+	
     private EditText addressText;
     private EditText userText;
     private EditText passText;
@@ -40,9 +43,9 @@ public class AccountConfig extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-        dbAdapter.open();
+        if (dbAdapter == null)
+        	dbAdapter = new DbAdapter(this);
+
         setContentView(R.layout.account_config_look);
         
         addressText = (EditText) findViewById(R.id.address);
@@ -112,7 +115,7 @@ public class AccountConfig extends Activity {
             startManagingCursor(cursor);
             addressText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.ADDRESS)));
             userText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.USER)));
-            passText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.PASS)));
+            //passText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.PASS)));
             accountTypeOption.setSelection(accountTypeAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.ACCOUNT_TYPE))));
             incomingServerText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_SERVER)));
             incomingPortText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_PORT)));
@@ -126,9 +129,23 @@ public class AccountConfig extends Activity {
     }
     
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putLong(Accounts._ID, accountId);
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        if (accountId != null)
+        	savedInstanceState.putLong(Accounts._ID, accountId);
+        savedInstanceState.putString(Accounts.ADDRESS, addressText.getText().toString());
+        savedInstanceState.putString(Accounts.USER, userText.getText().toString());
+        savedInstanceState.putString(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
+        savedInstanceState.putString(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
+        savedInstanceState.putInt(Accounts.INCOMING_SECURITY, incomingSecurityOption.getSelectedItemPosition());
+        savedInstanceState.putString(Accounts.OUTGOING_SERVER, outgoingServerText.getText().toString());
+        savedInstanceState.putString(Accounts.OUTGOING_PORT, outgoingPortText.getText().toString());
+        savedInstanceState.putInt(Accounts.OUTGOING_SECURITY, outgoingSecurityOption.getSelectedItemPosition());
+        savedInstanceState.putInt(Accounts.DELETE_EMAILS, deleteEmailsOption.getSelectedItemPosition());
+        String password = null;
+		if (passText.getText() != null && "".equals(passText.getText()) == false)
+			password = passText.getText().toString();	
+        savedInstanceState.putString(Accounts.PASS, szyfrPassword(password));
     }
     
     @Override
@@ -143,21 +160,24 @@ public class AccountConfig extends Activity {
         populateFields();
     }
     
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	saveState();
+    	if (dbAdapter != null) {
+    		dbAdapter.close();
+    		dbAdapter = null;
+    	}
+    }
+    
     private void saveState() {
     	ContentValues accountData = new ContentValues();
 		accountData.put(Accounts.ADDRESS, addressText.getText().toString());
 		accountData.put(Accounts.USER, userText.getText().toString());
-		String password = passText.getText().toString();
-		MessageDigest m;
-		String shyfrpassword = null;
-		try {
-			m = MessageDigest.getInstance( "MD5" );
-			m.update( password.getBytes(), 0, password.length() );
-			shyfrpassword = new BigInteger( 1, m.digest() ).toString( 16 );
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}		
-		accountData.put(Accounts.PASS, shyfrpassword);
+		String password = null;
+		if (passText.getText() != null && "".equals(passText.getText()) == false)
+			password = passText.getText().toString();	
+		accountData.put(Accounts.PASS, szyfrPassword(password));
 		accountData.put(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
 		accountData.put(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
 		accountData.put(Accounts.INCOMING_SECURITY, inSecurityAdapter.getItem(incomingSecurityOption.getSelectedItemPosition()).toString());
@@ -175,6 +195,21 @@ public class AccountConfig extends Activity {
         } else {
             dbAdapter.updateAccount(accountId, accountData);
         }
+    }
+    
+    private String szyfrPassword (String passwordToSzyfr) {
+    	String password = passwordToSzyfr;
+    	
+		MessageDigest m;
+		String shyfrpassword = null;
+		try {
+			m = MessageDigest.getInstance( "MD5" );
+			m.update( password.getBytes(), 0, password.length() );
+			shyfrpassword = new BigInteger( 1, m.digest() ).toString( 16 );
+		} catch (NoSuchAlgorithmException e) {
+			Log.e(TAG, "Error during szyfrowanie hasla! " + e);
+		}	
+		return shyfrpassword;
     }
     
 }

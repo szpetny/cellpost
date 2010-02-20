@@ -2,7 +2,7 @@ package pl.app.cellpost.activities.main;
 
 import pl.app.cellpost.R;
 import pl.app.cellpost.activities.accounts.AccountsList;
-import pl.app.cellpost.activities.mails.MailSender;
+import pl.app.cellpost.activities.emails.MailSender;
 import pl.app.cellpost.common.DbAdapter;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -15,18 +15,18 @@ import android.widget.ListView;
 
 public class CellPostMain extends ListActivity {
 	private static final String ACTION_ADD_ACCOUNT = "pl.app.cellpost.ADD_ACCOUNT";
-
+	private DbAdapter dbAdapter;
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
 
         setContentView(R.layout.main_list_look);
-        DbAdapter da = new DbAdapter(this);      
-        da.open();
-        Cursor	cursor = da.fetchAllAccounts();
-        if (cursor != null) {
-        	startManagingCursor(cursor);
+        if (dbAdapter == null)
+        	dbAdapter = new DbAdapter(this);      
+        Cursor	cursor = dbAdapter.fetchAllAccounts();
+        if (!cursor.moveToFirst()) {
         	new AlertDialog.Builder(this).setMessage("There is no configured e-mail account. " +
         			" Do you want to configure your e-mail now?")
         	       .setCancelable(false)
@@ -63,6 +63,19 @@ public class CellPostMain extends ListActivity {
 		}
 		
 	}
-
 	
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	if (dbAdapter != null) {
+    		dbAdapter.close();
+    		dbAdapter = null;
+    	}
+    }
+
 }
