@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -33,6 +34,8 @@ public class AccountConfig extends Activity {
     private EditText outgoingPortText;
     private Spinner outgoingSecurityOption;
     private Spinner deleteEmailsOption;
+    private EditText nick;
+    private CheckBox defaultAccount;
     private Long accountId;
     private DbAdapter dbAdapter;
     private ArrayAdapter<CharSequence> inSecurityAdapter;
@@ -81,6 +84,10 @@ public class AccountConfig extends Activity {
                 this, R.array.delete_from_serv_options, android.R.layout.simple_spinner_item);
         deleteEmailsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         deleteEmailsOption.setAdapter(deleteEmailsAdapter);
+        
+        nick = (EditText) findViewById(R.id.nick);
+        
+        defaultAccount = (CheckBox) findViewById(R.id.defaultAccount);
       
         Button okButton = (Button) findViewById(R.id.ok);
         Button cancelButton = (Button) findViewById(R.id.cancel);   
@@ -95,7 +102,7 @@ public class AccountConfig extends Activity {
        				
         okButton.setOnClickListener(new View.OnClickListener() {
         	public void onClick(View view) {
-        	    setResult(RESULT_OK);
+        	    saveState();
         	    finish();
         	}
           
@@ -103,6 +110,8 @@ public class AccountConfig extends Activity {
         
         cancelButton.setOnClickListener(new View.OnClickListener() {
         	public void onClick(View view) {
+        		accountId = null;
+        		addressText.setText("");
         	    finish();
         	}
           
@@ -113,17 +122,24 @@ public class AccountConfig extends Activity {
         if (accountId != null) {
             Cursor cursor = dbAdapter.fetchAccount(accountId);
             startManagingCursor(cursor);
-            addressText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.ADDRESS)));
-            userText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.USER)));
-            //passText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.PASS)));
-            accountTypeOption.setSelection(accountTypeAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.ACCOUNT_TYPE))));
-            incomingServerText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_SERVER)));
-            incomingPortText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_PORT)));
-            incomingSecurityOption.setSelection(inSecurityAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_SECURITY))));
-            outgoingServerText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.OUTGOING_SERVER)));
-            outgoingPortText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.OUTGOING_PORT)));
-            outgoingSecurityOption.setSelection(outSecurityAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.OUTGOING_SECURITY))));
-            deleteEmailsOption.setSelection(deleteEmailsAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.DELETE_EMAILS))));
+            if (cursor.moveToFirst()) {
+            	addressText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.ADDRESS)));
+                userText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.USER)));
+                //passText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.PASS)));
+                accountTypeOption.setSelection(accountTypeAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.ACCOUNT_TYPE))));
+                incomingServerText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_SERVER)));
+                incomingPortText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_PORT)));
+                incomingSecurityOption.setSelection(inSecurityAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.INCOMING_SECURITY))));
+                outgoingServerText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.OUTGOING_SERVER)));
+                outgoingPortText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.OUTGOING_PORT)));
+                outgoingSecurityOption.setSelection(outSecurityAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.OUTGOING_SECURITY))));
+                deleteEmailsOption.setSelection(deleteEmailsAdapter.getPosition(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.DELETE_EMAILS))));
+                nick.setText(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.NICK)));
+                defaultAccount.setChecked(Boolean.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(Accounts.DEFAULT))));
+            }
+            else {
+            	Log.e(TAG, "The database crash or sth...");
+            }
             
         }
     }
@@ -131,21 +147,7 @@ public class AccountConfig extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        if (accountId != null)
-        	savedInstanceState.putLong(Accounts._ID, accountId);
-        savedInstanceState.putString(Accounts.ADDRESS, addressText.getText().toString());
-        savedInstanceState.putString(Accounts.USER, userText.getText().toString());
-        savedInstanceState.putString(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
-        savedInstanceState.putString(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
-        savedInstanceState.putInt(Accounts.INCOMING_SECURITY, incomingSecurityOption.getSelectedItemPosition());
-        savedInstanceState.putString(Accounts.OUTGOING_SERVER, outgoingServerText.getText().toString());
-        savedInstanceState.putString(Accounts.OUTGOING_PORT, outgoingPortText.getText().toString());
-        savedInstanceState.putInt(Accounts.OUTGOING_SECURITY, outgoingSecurityOption.getSelectedItemPosition());
-        savedInstanceState.putInt(Accounts.DELETE_EMAILS, deleteEmailsOption.getSelectedItemPosition());
-        String password = null;
-		if (passText.getText() != null && "".equals(passText.getText()) == false)
-			password = passText.getText().toString();	
-        savedInstanceState.putString(Accounts.PASS, szyfrPassword(password));
+        savedInstanceState.putLong(Accounts._ID, accountId);
     }
     
     @Override
@@ -172,29 +174,36 @@ public class AccountConfig extends Activity {
     
     private void saveState() {
     	ContentValues accountData = new ContentValues();
-		accountData.put(Accounts.ADDRESS, addressText.getText().toString());
-		accountData.put(Accounts.USER, userText.getText().toString());
-		String password = null;
-		if (passText.getText() != null && "".equals(passText.getText()) == false)
-			password = passText.getText().toString();	
-		accountData.put(Accounts.PASS, szyfrPassword(password));
-		accountData.put(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
-		accountData.put(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
-		accountData.put(Accounts.INCOMING_SECURITY, inSecurityAdapter.getItem(incomingSecurityOption.getSelectedItemPosition()).toString());
-		accountData.put(Accounts.OUTGOING_SERVER, outgoingServerText.getText().toString());
-		accountData.put(Accounts.OUTGOING_PORT, outgoingPortText.getText().toString());
-		accountData.put(Accounts.OUTGOING_SECURITY, outSecurityAdapter.getItem(outgoingSecurityOption.getSelectedItemPosition()).toString());
-		accountData.put(Accounts.ACCOUNT_TYPE, accountTypeAdapter.getItem(accountTypeOption.getSelectedItemPosition()).toString());
-		accountData.put(Accounts.DELETE_EMAILS, deleteEmailsAdapter.getItem(deleteEmailsOption.getSelectedItemPosition()).toString());
-
-        if (accountId == null) {
-            long id = dbAdapter.createAccount(accountData);
-            if (id > 0) {
-            	accountId = id;
+    	if(addressText.getText().toString() != null && "".equals(addressText.getText().toString()) == false) {
+    		accountData.put(Accounts.ADDRESS, addressText.getText().toString());
+        	accountData.put(Accounts.USER, userText.getText().toString());
+    	    String password = null;
+    	    if (passText.getText() != null && "".equals(passText.getText()) == false)
+    	    	password = passText.getText().toString();	
+    	    accountData.put(Accounts.PASS, szyfrPassword(password));
+        	accountData.put(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
+    		accountData.put(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
+    		accountData.put(Accounts.INCOMING_SECURITY, inSecurityAdapter.getItem(incomingSecurityOption.getSelectedItemPosition()).toString());
+    		accountData.put(Accounts.OUTGOING_SERVER, outgoingServerText.getText().toString());
+    		accountData.put(Accounts.OUTGOING_PORT, outgoingPortText.getText().toString());
+    		accountData.put(Accounts.OUTGOING_SECURITY, outSecurityAdapter.getItem(outgoingSecurityOption.getSelectedItemPosition()).toString());
+    		accountData.put(Accounts.ACCOUNT_TYPE, accountTypeAdapter.getItem(accountTypeOption.getSelectedItemPosition()).toString());
+    		accountData.put(Accounts.DELETE_EMAILS, deleteEmailsAdapter.getItem(deleteEmailsOption.getSelectedItemPosition()).toString());
+    		accountData.put(Accounts.NICK, nick.getText().toString());
+    		accountData.put(Accounts.DEFAULT, defaultAccount.isChecked() ? "true" : "false");
+    	}
+    	
+    	if (accountData != null && accountData.containsKey(Accounts.ADDRESS)) {
+    		if (accountId == null) {
+                long id = dbAdapter.createAccount(accountData);
+                if (id > 0) {
+                	accountId = id;
+                }
+            } else {
+                dbAdapter.updateAccount(accountId, accountData);
             }
-        } else {
-            dbAdapter.updateAccount(accountId, accountData);
-        }
+    	}
+
     }
     
     private String szyfrPassword (String passwordToSzyfr) {

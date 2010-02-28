@@ -1,11 +1,11 @@
 /**
  * 
  */
-package pl.app.cellpost.activities.accounts;
+package pl.app.cellpost.activities.emails;
 
 import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
-import pl.app.cellpost.common.CellPostInternals.Accounts;
+import pl.app.cellpost.common.CellPostInternals.Emails;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -25,14 +25,13 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
  * @author Malgorzata Stellert
  *
  */
-public class AccountsList extends ListActivity {
+public class Drafts extends ListActivity {
 		
-		private static final String TAG = "AccountsList";
+		private static final String TAG = "Drafts";
 		
 		private DbAdapter dbAdapter;
 		
 		// Ids for menus items.
-	    private static final int ADD_ID = Menu.FIRST;
 	    private static final int EDIT_ID = Menu.FIRST + 1;
 	    private static final int DELETE_ID = Menu.FIRST + 2;
 	   
@@ -40,27 +39,8 @@ public class AccountsList extends ListActivity {
 		protected void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
 	        setContentView(R.layout.list_look);
-			listAccounts();
+			listEmails();
 	
-		}
-		
-		@Override
-		public boolean onCreateOptionsMenu(Menu menu) {
-		     super.onCreateOptionsMenu(menu);
-		     menu.add(0, ADD_ID, 0, R.string.menu_add)
-		         .setShortcut('0', 'a')
-		         .setIcon(android.R.drawable.ic_menu_add);	     
-		        return true;
-		}
-	
-		@Override
-		public boolean onMenuItemSelected(int featureId, MenuItem item) {
-		     switch(item.getItemId()) {
-		        case ADD_ID:
-		        	addAccount();
-		            return true;
-		     }
-		     return super.onMenuItemSelected(featureId, item);
 		}
 		
 	    @Override
@@ -77,11 +57,11 @@ public class AccountsList extends ListActivity {
 			switch(item.getItemId()) {
 			case EDIT_ID:		
 				info = (AdapterContextMenuInfo) item.getMenuInfo();
-				editAccount(info.id);
+				editEmail(info.id);
 		        return true;
 	    	case DELETE_ID:
 	    		info = (AdapterContextMenuInfo) item.getMenuInfo();
-	    		deleteAccount(info.id);
+	    		deleteEmail(info.id);
 		        return true;
 			}
 			return super.onContextItemSelected(item);
@@ -90,13 +70,13 @@ public class AccountsList extends ListActivity {
 	    @Override
 	    protected void onListItemClick(ListView l, View v, int position, long id) {
 	        super.onListItemClick(l, v, position, id);
-	        editAccount(id);
+	        editEmail(id);
 	    }
 	    
 	    @Override
 	    protected void onResume() {
 	        super.onResume();
-	        listAccounts();
+	        listEmails();
 	    }
 	    
 	    @Override
@@ -108,36 +88,32 @@ public class AccountsList extends ListActivity {
 	    	}
 	    }
 	    
-		private void deleteAccount(long accountId) {
+		private void deleteEmail(long emailId) {
 			DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-			if (dbAdapter.deleteAccount(accountId)) {
-				listAccounts();
+			if (dbAdapter.deleteEmail(emailId)) {
+				listEmails();
 			}
 			else {
-				Log.e(TAG, "Operation of deleting account failed!");
+				Log.e(TAG, "Operation of deleting a draft email failed!");
 			}
 			
 		}
 
-		private void editAccount(long accountId) {
-			Intent intent = new Intent(this, AccountConfig.class);
-	        intent.putExtra(Accounts._ID, accountId);
+		private void editEmail(long emailId) {
+			Intent intent = new Intent(this, MailSender.class);
+	        intent.putExtra(Emails._ID, emailId);
 	        startActivity(intent);
 			
 		}
 
-		private void addAccount() {
-			startActivity(new Intent(this, AccountConfig.class));
-		}
-		
-		private void listAccounts() {
+		private void listEmails() {
 			if (dbAdapter == null)
 			    dbAdapter = new DbAdapter(this);
-				Cursor c = dbAdapter.fetchAllAccounts();
+				Cursor c = dbAdapter.fetchAllDrafts();
 				startManagingCursor(c);
 				if (c.moveToFirst()) {
 					ListAdapter adapter = new  SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.list_single_row, 
-							c, new String[]{Accounts.ADDRESS}, new int []{R.id.singleRow});     
+							c, new String[]{Emails.ADDRESSEE}, new int []{R.id.singleRow});     
 					setListAdapter(adapter);
 					registerForContextMenu(getListView());
 				}

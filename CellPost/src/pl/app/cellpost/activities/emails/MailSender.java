@@ -1,7 +1,11 @@
 package pl.app.cellpost.activities.emails;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
+import pl.app.cellpost.common.CellPostInternals.Accounts;
 import pl.app.cellpost.common.CellPostInternals.Emails;
 import pl.app.cellpost.logic.GMailAuthenticator;
 import android.app.Activity;
@@ -28,22 +32,32 @@ public class MailSender extends Activity {
     private EditText bcc;
     private EditText subject;
     private EditText contents;
-    
+    private String attachment = null;
+    private Timestamp creationDate = null;
+    private Timestamp modificationDate = null;
+    private Timestamp deliverDate = null;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*if (dbAdapter == null)
-        	dbAdapter = new DbAdapter(this);
-        */
+                
 	    setContentView(R.layout.mail_send_look);
 
+	    if (dbAdapter == null)
+        	dbAdapter = new DbAdapter(getApplication().getApplicationContext());
+	    
 	    to = (EditText) findViewById(R.id.to);
 	    cc = (EditText) findViewById(R.id.cc);
 	    bcc = (EditText) findViewById(R.id.bcc);
 	    subject = (EditText) findViewById(R.id.subject);
 	    contents = (EditText) findViewById(R.id.contents);
-
+	    creationDate = new Timestamp(new Date().getTime());
+	    
+	    emailId = savedInstanceState != null ? savedInstanceState.getLong(Emails._ID) : null;
+		if (emailId == null) {
+			Bundle extras = getIntent().getExtras();            
+			emailId = extras != null ? extras.getLong(Emails._ID) : null;
+		}
 	}
 	
 	@Override
@@ -84,14 +98,8 @@ public class MailSender extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        if (emailId != null)
-        	savedInstanceState.putLong(Emails._ID, emailId);
-        savedInstanceState.putString(Emails.ADDRESSEE, to.getText().toString());
-        savedInstanceState.putString(Emails.CC, cc.getText().toString());
-        savedInstanceState.putString(Emails.BCC, bcc.getText().toString());
-        savedInstanceState.putString(Emails.SUBJECT, subject.getText().toString());
-        savedInstanceState.putString(Emails.CONTENTS, contents.getText().toString());
-    }
+        savedInstanceState.putLong(Emails._ID, emailId);
+    }  
 	
 	@Override
     protected void onPause() {
@@ -102,6 +110,8 @@ public class MailSender extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (dbAdapter == null)
+        	dbAdapter = new DbAdapter(getApplication().getApplicationContext());
         populateFields();
     }
     
@@ -119,46 +129,94 @@ public class MailSender extends Activity {
         if (emailId != null) {
             Cursor cursor = dbAdapter.fetchEmail(emailId);
             startManagingCursor(cursor);
-            to.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.ADDRESSEE)));
-            cc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CC)));
-            bcc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.BCC)));
-            subject.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
-            contents.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CONTENTS)));
+            if (cursor.moveToFirst()) {
+            	to.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.ADDRESSEE)));
+                cc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CC)));
+                bcc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.BCC)));
+                subject.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
+                contents.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CONTENTS)));
+            }
+            else {
+            	Log.e(TAG, "The database crash or sth...");
+            }
                        
         }
     }
     
     private void saveMail() {
     	ContentValues emailData = new ContentValues();
-		emailData.put(Emails.ADDRESSEE, to.getText().toString());
-		emailData.put(Emails.CC, cc.getText().toString());
-		emailData.put(Emails.BCC, bcc.getText().toString());	
-		emailData.put(Emails.SUBJECT, subject.getText().toString());
-		emailData.put(Emails.CONTENTS, contents.getText().toString());
-		
-        if (emailId == null) {
-            long id = dbAdapter.createEmail(emailData);
-            if (id > 0) {
-            	emailId = id;
-            }
-        } else {
-            dbAdapter.updateEmail(emailId, emailData);
-        }
+	    if (to != null && "".equals(to.getText().toString()) == false) {
+	    	emailData.put(Emails.ADDRESSEE, to.getText().toString());
+			emailData.put(Emails.CC, cc.getText().toString());
+			emailData.put(Emails.BCC, bcc.getText().toString());	
+			emailData.put(Emails.SUBJECT, subject.getText().toString());
+			emailData.put(Emails.CONTENTS, contents.getText().toString());
+
+			if(creationDate != null) 
+	    		emailData.put(Emails.CREATE_DATE, creationDate.toGMTString());
+			if(modificationDate != null) 
+	    		emailData.put(Emails.MODIFY_DATE, modificationDate.toGMTString());
+			if(deliverDate != null) 
+	    		emailData.put(Emails.DELIVER_DATE, deliverDate.toGMTString());
+	    }
+	    if (emailData != null && emailData.containsKey(Emails.ADDRESSEE)) {
+	    	if (emailId == null) {
+	            long id = dbAdapter.saveEmail(emailData);
+	            if (id > 0) {
+	            	emailId = id;
+	            }
+	        } else {
+	            dbAdapter.updateSavedEmail(emailId, emailData);
+	        }
+	    }
+        
     }
 
-	private void sendMail() {
-		try {   
-        	GMailAuthenticator sender = new GMailAuthenticator("username@gmail.com", "password");
-            sender.sendMail("This is Subject",   
-                    "This is Body",   
-                    "user@gmail.com",   
-                    "user@yahoo.com");   
-        } catch (Exception e) {   
-            Log.e(TAG, e.getMessage(), e);   
-        } 
+	private void sendMail() {  
+		Cursor cursor = dbAdapter.fetchDefaultAccount();
+		startManagingCursor(cursor);
+		if (cursor.moveToFirst()) {
+			String defaultAddress = cursor.getString(cursor.getColumnIndex(Accounts.ADDRESS));
+			String password = cursor.getString(cursor.getColumnIndex(Accounts.PASS));
+			String subject = this.subject.getText().toString();
+			String contents = this.contents.getText().toString();
+			String to = this.to.getText().toString();
+			String cc = this.cc.getText().toString();
+			String bcc = this.bcc.getText().toString();
+			
+			try { 
+				GMailAuthenticator sender = new GMailAuthenticator(defaultAddress, password);
+	            sender.sendMail(subject, contents, defaultAddress, to);   
+	            deliverDate = new Timestamp(new Date().getTime());
+	            
+	        } catch (Exception e) {   
+	            Log.e(TAG, "Error during trying to send e-mail! " + e.getMessage(), e);   
+	        } 
+	        
+		}
+
+		else {
+			Log.e(TAG, "Something wrong happened..");
+		}
+        	
+		saveMail();
 	}
 	
 	private void deleteMail() {
-		
+		if (emailId != null) {
+			dbAdapter.deleteEmail(emailId);
+		}
+		else {
+			to.setText("");
+		    cc.setText("");
+		    bcc.setText("");
+		    subject.setText("");
+		    contents.setText("");
+		    attachment = null;
+		    creationDate = null;
+		    modificationDate = null;
+		    deliverDate = null;
+
+		}
 	}
 }

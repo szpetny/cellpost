@@ -119,6 +119,20 @@ public final class CellPostInternals {
          * <P>Type: TEXT</P>
          */
         public static final String DELETE_EMAILS = "DELETE_EMAILS";
+        
+        /**
+         * Determines whether this account is default one to send e-mails
+         * from.
+         * <P>Type: TEXT</P>
+         */
+        public static final String DEFAULT = "DEFAULT_ACCOUNT";
+        
+        /**
+         * Determines whether this account is default one to send e-mails
+         * from.
+         * <P>Type: TEXT</P>
+         */
+        public static final String NICK = "NICK";
 
     }
 
@@ -127,7 +141,6 @@ public final class CellPostInternals {
      * Emails table
      */
     public static final class Emails implements BaseColumns {
-        // This class cannot be instantiated
         private Emails() {}
 
         /**

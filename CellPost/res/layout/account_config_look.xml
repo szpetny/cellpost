@@ -142,12 +142,28 @@
 	    		 android:layout_width="fill_parent" 
 	    		 android:entries="@array/account_conf_security_options" />
 	    		 
-	    		 
+	    <TextView android:id="@+id/nickLabel" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:text="@string/account_conf_nick" 
+	              android:layout_below="@id/outgoingSecurity" /> 		
+	              
+	    <EditText android:id="@+id/nick" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:background="@android:drawable/editbox_background"
+	              android:layout_below="@id/nickLabel" />  
+	             
+	    <CheckBox android:id="@+id/defaultAccount" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:text="@string/account_conf_default" 
+	              android:layout_below="@id/nick" />  
 		
 		<Button android:id="@+id/ok"
 	    		android:layout_width="100px" 
 	            android:layout_height="wrap_content"
-	            android:layout_below="@id/outgoingSecurity"
+	            android:layout_below="@id/defaultAccount"
 	            android:layout_alignParentRight="true"
 	            android:layout_alignParentBottom="true"
 	            android:layout_marginLeft="10px"
@@ -159,7 +175,7 @@
 	    <Button android:id="@+id/cancel"
 	    		android:layout_width="100px" 
 	            android:layout_height="wrap_content"
-	           	android:layout_below="@id/outgoingSecurity"
+	           	android:layout_below="@id/defaultAccount"
 	            android:layout_marginLeft="10px"
 	            android:layout_marginTop="10px"
 	            android:text="@string/cancel" 

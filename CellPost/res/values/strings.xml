@@ -3,11 +3,13 @@
     <string name="app_name">Cell Post!</string>
     
     <!-- Activities Titles -->
-    <string name="inbox">Inbox</string>
     <string name="acc_list">Your E-mail Accounts</string>
     <string name="acc_config">Account Manager</string>
     <string name="acc_add">Add Account Configuration</string>
     <string name="mail_send">Send New E-mail Message</string>
+    <string name="mail_inbox">Inbox</string>
+    <string name="mail_drafts">Saved copies</string>
+    <string name="mail_sent">Sent e-mails</string>
     
     <!-- Menu Options -->
     <string name="menu_add">Add</string>
@@ -15,6 +17,7 @@
 	<string name="menu_delete">Delete</string>   
 	<string name="menu_send">Send</string>
 	<string name="menu_save">Save</string>
+	<string name="menu_default">Set as default</string>
 	
 	<!-- Accounts Config Form -->
     <string name="account_conf_address">Your e-mail address</string> 
@@ -29,6 +32,8 @@
     <string name="account_conf_out_security">Security for outgoing server</string>
     <string name="account_conf_delete_emails">Delete from server</string>
     <string name="account_conf_imap_path_pref">IMAP path prefix</string>
+    <string name="account_conf_default">Send e-mails from this account as default</string>
+    <string name="account_conf_nick">Nickname to sign e-mails</string>
     
     <!-- Mail Sending Form -->
     <string name="mail_to">To</string> 
@@ -44,7 +49,4 @@
     <string name="back">Back</string>
     <string name="send">Send</string>
     
-    <!-- Labels -->
-    <string name="choose_account_type">Choose account type:</string>
-
 </resources>
