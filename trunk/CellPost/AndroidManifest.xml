@@ -17,17 +17,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-       
-        <activity android:name=".activities.emails.Inbox"
-                  android:label="@string/inbox">
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT" />
-                <category android:name="android.intent.category.OPENABLE" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/*" />
-       		</intent-filter>
-        </activity>
         
         <activity android:name=".activities.accounts.AccountsList"
                   android:label="@string/acc_list"/>
@@ -42,6 +31,23 @@
         
         <activity android:name=".activities.emails.MailSender"
                   android:label="@string/mail_send"/>
+        
+        <activity android:name=".activities.emails.Drafts"
+                  android:label="@string/mail_drafts"/>
+                  
+       	<activity android:name=".activities.emails.Sent"
+                  android:label="@string/mail_sent"/>
+                  
+        <activity android:name=".activities.emails.Inbox"
+                  android:label="@string/mail_inbox">
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+       		</intent-filter>
+        </activity>
     </application>
     <uses-sdk android:minSdkVersion="3" />
     

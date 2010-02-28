@@ -2,7 +2,10 @@ package pl.app.cellpost.activities.main;
 
 import pl.app.cellpost.R;
 import pl.app.cellpost.activities.accounts.AccountsList;
+import pl.app.cellpost.activities.emails.Drafts;
+import pl.app.cellpost.activities.emails.Inbox;
 import pl.app.cellpost.activities.emails.MailSender;
+import pl.app.cellpost.activities.emails.Sent;
 import pl.app.cellpost.common.DbAdapter;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -26,6 +29,7 @@ public class CellPostMain extends ListActivity {
         if (dbAdapter == null)
         	dbAdapter = new DbAdapter(this);      
         Cursor	cursor = dbAdapter.fetchAllAccounts();
+        startManagingCursor(cursor);
         if (!cursor.moveToFirst()) {
         	new AlertDialog.Builder(this).setMessage("There is no configured e-mail account. " +
         			" Do you want to configure your e-mail now?")
@@ -50,13 +54,13 @@ public class CellPostMain extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		switch(position) {
-			case 0: System.out.println("Inbox");
+			case 0: startActivity(new Intent(this,Inbox.class));
 					break;
 			case 1: startActivity(new Intent(this, MailSender.class));
 					break;
-			case 2: System.out.println("Drafts");
+			case 2: startActivity(new Intent(this, Drafts.class));
 					break;
-			case 3: System.out.println("Sent");
+			case 3: startActivity(new Intent(this, Sent.class));
 					break;
 			case 4: startActivity(new Intent(this, AccountsList.class));
 					break;

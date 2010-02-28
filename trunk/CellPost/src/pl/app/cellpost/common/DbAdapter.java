@@ -39,14 +39,33 @@ public class DbAdapter {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL("CREATE TABLE accounts (DEFAULT_ACCOUNT NUMERIC, _id INTEGER PRIMARY KEY, ADDRESS TEXT, " +
-					"USER TEXT, PASS TEXT, ACCOUNT_TYPE TEXT, INCOMING_SERVER TEXT, INCOMING_PORT NUMERIC, " +
-					"INCOMING_SECURITY TEXT, DELETE_EMAILS NUMERIC, OUTGOING_SERVER TEXT, OUTGOING_PORT NUMERIC, OUTGOING_SECURITY TEXT); " +
-					"CREATE TABLE emails (_id INTEGER PRIMARY KEY, SENDER TEXT, ADDRESSEE TEXT, CC TEXT, BCC TEXT, SUBJECT TEXT, " +
-					"CONTENTS TEXT, ATTACHMENT BLOB, CREATE_DATE TEXT, MODIFY_DATE TEXT, DELIVER_DATE TEXT); " +
-					"INSERT INTO emails VALUES(1,'dummy',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL); " +
-					"CREATE UNIQUE INDEX account_id ON accounts(DEFAULT_ACCOUNT ASC); " +
-					"CREATE UNIQUE INDEX email_id ON emails(_id ASC);"); 
+			db.execSQL("CREATE TABLE accounts (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+											   "ADDRESS TEXT NOT NULL, " +
+											   "USER TEXT, " +
+											   "PASS TEXT, " +
+											   "ACCOUNT_TYPE TEXT, " +
+											   "INCOMING_SERVER TEXT, " +
+											   "INCOMING_PORT NUMERIC, " +
+											   "INCOMING_SECURITY TEXT, " +
+											   "DELETE_EMAILS NUMERIC, " +
+											   "OUTGOING_SERVER TEXT, " +
+											   "OUTGOING_PORT NUMERIC, " +
+											   "OUTGOING_SECURITY TEXT," +
+											   "DEFAULT_ACCOUNT TEXT, " +
+											   "NICK TEXT); ");
+					
+			db.execSQL("CREATE TABLE emails (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+											 "SENDER TEXT, " +
+											 "ADDRESSEE TEXT NOT NULL, " +
+											 "CC TEXT, " +
+											 "BCC TEXT, " +
+											 "SUBJECT TEXT, " +
+											 "CONTENTS TEXT, " +
+											 "ATTACHMENT BLOB, " +
+											 "CREATE_DATE TIMESTAMP, " +
+											 "MODIFY_DATE TIMESTAMP, " +
+											 "DELIVER_DATE TIMESTAMP);");
+					
 		}
 		
 	    @Override
@@ -147,6 +166,19 @@ public class DbAdapter {
 		}
 		return cursor;	
 	}
+	
+	/**
+	* Return a Cursor positioned at the account that is the default one to send messages
+	*
+	* @return Cursor positioned to matching account, if found
+	* @throws SQLException if account could not be found/retrieved
+	*/
+	public Cursor fetchDefaultAccount() throws SQLException {
+	
+		Cursor cursor = db.query(true, Accounts.TABLE_NAME, new String[] {"*"}, Accounts.DEFAULT + "= 'true'", 
+				null, null, null, null, null);
+		return cursor;	
+	}
 
 	/**
 	* Update the account settings using the details provided. The account to be updated is
@@ -191,7 +223,7 @@ public class DbAdapter {
 	* @param ContentValues containing email parameters
 	* @return emailId or -1 if failed
 	*/
-	public long createEmail(ContentValues emailParams) {
+	public long saveEmail(ContentValues emailParams) {
 		return db.insert(Emails.TABLE_NAME, null, emailParams);
 	}
 	
@@ -224,6 +256,26 @@ public class DbAdapter {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
 				null, null, null, null, null);
 	}
+	
+	/**
+	* Return a Cursor over the list of all sent emails in the database
+	*
+	* @return Cursor over all emails
+	*/
+	public Cursor fetchAllSent() {
+		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
+				Emails.DELIVER_DATE + " is not null ", null, null, null, null);
+	}
+	
+	/**
+	* Return a Cursor over the list of all draft emails in the database
+	*
+	* @return Cursor over all emails
+	*/
+	public Cursor fetchAllDrafts() {
+		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
+				Emails.DELIVER_DATE + " is null OR " + Emails.MODIFY_DATE + " is not null ", null, null, null, null);
+	}
 
 	/**
 	* Return a Cursor positioned at the email that matches the given emailId
@@ -250,7 +302,10 @@ public class DbAdapter {
 	* @param emailParams to set new email parameters 
 	* @return true if the email was successfully updated, false otherwise
 	*/
-	public boolean updateEmail(long emailId, ContentValues emailParams) {
+	public boolean updateSavedEmail(long emailId, ContentValues emailParams) {
 		return db. update(Emails.TABLE_NAME, emailParams, Emails._ID + "=" + emailId, null) > 0;
 	}
+
+
+	
 }
