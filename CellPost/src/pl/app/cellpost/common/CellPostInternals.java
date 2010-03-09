@@ -159,11 +159,6 @@ public final class CellPostInternals {
         public static final String CONTENT_ITEM_TYPE = "text/plain";
         
         /**
-         * The default sort order for this table
-         */
-        public static final String DEFAULT_SORT_ORDER = "modified DESC";
-        
-        /**
          * Table name
          */
         public static final String TABLE_NAME = "emails";
@@ -235,10 +230,16 @@ public final class CellPostInternals {
         public static final String MODIFY_DATE = "MODIFY_DATE";
         
         /**
-         * The timestamp for when the email was delivered to inbox
+         * The timestamp for when the email was sent actually :)
          * <P>Type: INTEGER (long from System.curentTimeMillis())</P>
          */
         public static final String DELIVER_DATE = "DELIVER_DATE";
+        
+        /**
+         * The timestamp for when the email was delivered to inbox, so received actually
+         * <P>Type: INTEGER (long from System.curentTimeMillis())</P>
+         */
+        public static final String RECEIVE_DATE = "RECEIVE_DATE";
         
         /**
          * Indicates which of user account the email belong to

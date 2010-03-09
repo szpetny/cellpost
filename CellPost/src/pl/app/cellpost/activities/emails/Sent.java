@@ -29,7 +29,9 @@ public class Sent extends ListActivity {
 		
 		private static final String TAG = "Drafts";
 		
-		private DbAdapter dbAdapter;
+		private static final String FORWARD = "FORWARD";
+		
+		private DbAdapter dbAdapter = null;
 		
 		// Ids for menus items.
 	    private static final int EDIT_ID = Menu.FIRST;
@@ -88,9 +90,9 @@ public class Sent extends ListActivity {
 	    	}
 	    }
 	    
-		private void deleteSent(long accountId) {
+		private void deleteSent(long emailId) {
 			DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-			if (dbAdapter.deleteEmail(accountId)) {
+			if (dbAdapter.deleteEmail(emailId)) {
 				listSent();
 			}
 			else {
@@ -99,9 +101,10 @@ public class Sent extends ListActivity {
 			
 		}
 
-		private void editSent(long accountId) {
+		private void editSent(long emailId) {
 			Intent intent = new Intent(this, MailSender.class);
-	        intent.putExtra(Emails._ID, accountId);
+	        intent.putExtra(Emails._ID, emailId);
+	        intent.putExtra(FORWARD, FORWARD);
 	        startActivity(intent);
 			
 		}

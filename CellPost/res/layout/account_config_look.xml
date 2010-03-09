@@ -11,14 +11,12 @@
 	                android:layout_height="wrap_content">   
 	                 
 	    <TextView android:id="@+id/addressLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_address" />
 	
 	    <EditText android:id="@+id/address" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
-	              android:background="@android:drawable/editbox_background" 
+	    		  android:background="@android:drawable/editbox_background"
+	    		  style="@style/CellPostEditTextStyle"
 	              android:layout_below="@id/addressLabel" />
 	
 		<TextView android:id="@+id/userLabel" 

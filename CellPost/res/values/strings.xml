@@ -10,6 +10,8 @@
     <string name="mail_inbox">Inbox</string>
     <string name="mail_drafts">Saved copies</string>
     <string name="mail_sent">Sent e-mails</string>
+    <string name="settings_main">Settings</string>
+    <string name="settings_prefs">User Preferences</string>
     
     <!-- Menu Options -->
     <string name="menu_add">Add</string>
@@ -17,7 +19,8 @@
 	<string name="menu_delete">Delete</string>   
 	<string name="menu_send">Send</string>
 	<string name="menu_save">Save</string>
-	<string name="menu_default">Set as default</string>
+	<string name="menu_reply">Reply</string>
+	<string name="menu_forward">Forward</string>
 	
 	<!-- Accounts Config Form -->
     <string name="account_conf_address">Your e-mail address</string> 
@@ -36,12 +39,18 @@
     <string name="account_conf_nick">Nickname to sign e-mails</string>
     
     <!-- Mail Sending Form -->
+    <string name="mail_if_sent">Message sent successfully!</string> 
     <string name="mail_to">To</string> 
     <string name="mail_cc">Copy</string> 
     <string name="mail_bcc">Hidden copy</string> 
     <string name="mail_subject">Subject</string> 
     <string name="mail_contents">Contents</string> 
-       
+    
+    <!-- User Preferences Settings Form -->
+    <string name="settin_default_acc">Set default account to send e-mails</string> 
+    <string name="settin_notify_new_emails">Notify me when new e-mail comes</string> 
+    <string name="settin_check_4_emails">Check for new e-mails every:</string> 
+   
     <!-- Buttons -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

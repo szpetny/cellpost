@@ -9,10 +9,18 @@
                 
 	<RelativeLayout android:layout_width="fill_parent" 
 	                android:layout_height="wrap_content">   
+	                
+	    <TextView android:id="@+id/sentLabel" 
+	              android:layout_width="fill_parent" 
+	              android:layout_height="wrap_content" 
+	              android:background="@color/orange"
+	              android:visibility="invisible"
+	              android:text="@string/mail_if_sent" />
 	                 
 	    <TextView android:id="@+id/toLabel" 
 	              android:layout_width="fill_parent" 
 	              android:layout_height="wrap_content" 
+	              android:layout_below="@id/sentLabel"
 	              android:text="@string/mail_to" />
 	
 	    <EditText android:id="@+id/to" 
