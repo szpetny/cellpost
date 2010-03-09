@@ -1,14 +1,15 @@
 package pl.app.cellpost.activities.accounts;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+//import java.math.BigInteger;
+//import java.security.MessageDigest;
+//import java.security.NoSuchAlgorithmException;
 
 import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +23,10 @@ import android.widget.Spinner;
 public class AccountConfig extends Activity {
 
 	private static final String TAG = "AccountConfig";
+	
+	private static final String PREFS_NAME = "CellPostPrefsFile";
+	private static final String POP3_UIDL = "_POP3_UIDL";
+	private static final String NEW_IMAP_ACCOUNT = "_NEW_IMAP_ACCOUNT";
 	
     private EditText addressText;
     private EditText userText;
@@ -180,7 +185,7 @@ public class AccountConfig extends Activity {
     	    String password = null;
     	    if (passText.getText() != null && "".equals(passText.getText()) == false)
     	    	password = passText.getText().toString();	
-    	    accountData.put(Accounts.PASS, szyfrPassword(password));
+    	    accountData.put(Accounts.PASS, password);//szyfrPassword(password));
         	accountData.put(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
     		accountData.put(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
     		accountData.put(Accounts.INCOMING_SECURITY, inSecurityAdapter.getItem(incomingSecurityOption.getSelectedItemPosition()).toString());
@@ -199,6 +204,15 @@ public class AccountConfig extends Activity {
                 if (id > 0) {
                 	accountId = id;
                 }
+                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                if ("POP3".equals(outSecurityAdapter.getItem(outgoingSecurityOption.getSelectedItemPosition()).toString())) {
+                    editor.putString(addressText.getText().toString() + POP3_UIDL, "-1");
+                }
+                if ("IMAP".equals(outSecurityAdapter.getItem(outgoingSecurityOption.getSelectedItemPosition()).toString())) {
+                    editor.putString(addressText.getText().toString() + NEW_IMAP_ACCOUNT, "true");
+                }
+		        editor.commit();
             } else {
                 dbAdapter.updateAccount(accountId, accountData);
             }
@@ -206,7 +220,7 @@ public class AccountConfig extends Activity {
 
     }
     
-    private String szyfrPassword (String passwordToSzyfr) {
+    /*private String szyfrPassword (String passwordToSzyfr) {
     	String password = passwordToSzyfr;
     	
 		MessageDigest m;
@@ -219,6 +233,6 @@ public class AccountConfig extends Activity {
 			Log.e(TAG, "Error during szyfrowanie hasla! " + e);
 		}	
 		return shyfrpassword;
-    }
+    }*/
     
 }

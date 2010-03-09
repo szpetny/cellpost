@@ -64,7 +64,8 @@ public class DbAdapter {
 											 "ATTACHMENT BLOB, " +
 											 "CREATE_DATE TIMESTAMP, " +
 											 "MODIFY_DATE TIMESTAMP, " +
-											 "DELIVER_DATE TIMESTAMP);");
+											 "DELIVER_DATE TIMESTAMP " +
+											 "RECEIVE_DATE TIMESTAMP);");
 					
 		}
 		
@@ -168,6 +169,27 @@ public class DbAdapter {
 	}
 	
 	/**
+	* Return  a Cursor over the list of all accounts in the database, 
+	* which have configured incoming server. 
+	*
+	* @return Cursor positioned to matching account, if found
+	* @throws SQLException if account could not be found/retrieved
+	*/
+	public Cursor fetchAccountsToGetMail() throws SQLException {	
+		Cursor cursor = db.query(true, Accounts.TABLE_NAME, 
+				new String[] {Accounts.ADDRESS, Accounts.INCOMING_SERVER, Accounts.INCOMING_PORT, Accounts.INCOMING_SECURITY, 
+				Accounts.USER, Accounts.PASS, Accounts.DELETE_EMAILS, Accounts.ACCOUNT_TYPE}, 
+				"(" + Accounts.INCOMING_SERVER + " is not null) AND " +
+				"(" + Accounts.INCOMING_PORT + " is not null) AND " +
+				"(" + Accounts.INCOMING_SECURITY + " is not null)",
+				null, null, null, null, null);
+		if (cursor != null) {
+			cursor.moveToFirst();
+		}
+		return cursor;	
+	}
+	
+	/**
 	* Return a Cursor positioned at the account that is the default one to send messages
 	*
 	* @return Cursor positioned to matching account, if found
@@ -189,7 +211,24 @@ public class DbAdapter {
 	* @return true if the account was successfully updated, false otherwise
 	*/
 	public boolean updateAccount(long accountId, ContentValues accountParams) {
-		return db. update(Accounts.TABLE_NAME, accountParams, Accounts._ID + "=" + accountId, null) > 0;
+		setAccountAsDefault(accountId, accountParams);
+		return db.update(Accounts.TABLE_NAME, accountParams, Accounts._ID + "=" + accountId, null) > 0;
+	}
+	
+	/**
+	* As cannot be two accounts set as default, 
+	* to unable this situation this method checks if new configured account should be default.
+	* When true, sets other accounts to NOT DEFAULT.
+	*
+	* @param accountId id of new configured account 
+	* @param accountParams to parameters of new configured account 
+	*/
+	public void setAccountAsDefault(long accountId, ContentValues accountParams) {
+		if (accountParams.get(Accounts.DEFAULT) != null && "true".equals(accountParams.get(Accounts.DEFAULT).toString())) {
+			ContentValues defaultParam = new ContentValues();
+			defaultParam.put(Accounts.DEFAULT, "false");
+			db.update(Accounts.TABLE_NAME, defaultParam, Accounts._ID + " != " + accountId, null);
+		}
 	}
 	
 	/**
@@ -265,6 +304,16 @@ public class DbAdapter {
 	public Cursor fetchAllSent() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
 				Emails.DELIVER_DATE + " is not null ", null, null, null, null);
+	}
+	
+	/**
+	* Return a Cursor over the list of all received emails from all configured accounts in the database
+	*
+	* @return Cursor over all emails
+	*/
+	public Cursor fetchAllEmailsReceived() {
+		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
+				Emails.CREATE_DATE + " is null ", null, null, null, null);
 	}
 	
 	/**

@@ -2,12 +2,14 @@ package pl.app.cellpost.activities.emails;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import pl.app.cellpost.common.CellPostInternals.Emails;
-import pl.app.cellpost.logic.GMailAuthenticator;
+import pl.app.cellpost.logic.MailAuthenticator;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -15,27 +17,34 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class MailSender extends Activity {
 	private final String TAG = "MAIL_SENDER";
 
-    private DbAdapter dbAdapter;
+    private DbAdapter dbAdapter = null;
 	
     private static final int SEND_ID = Menu.FIRST;
     private static final int SAVE_ID = Menu.FIRST + 1;
     private static final int DELETE_ID = Menu.FIRST + 2;
     
-    private Long emailId;
-    private EditText to;
-    private EditText cc;
-    private EditText bcc;
-    private EditText subject;
-    private EditText contents;
+	private static final String REPLY = "REPLY";
+	private static final String FORWARD = "FORWARD";
+    
+    private Long emailId = null;
+    private EditText to = null;
+    private EditText cc = null;
+    private EditText bcc = null;
+    private EditText subject = null;
+    private EditText contents = null;
     private String attachment = null;
     private Timestamp creationDate = null;
     private Timestamp modificationDate = null;
     private Timestamp deliverDate = null;
+    private TextView ifSent = null;
+    private String sendingType = null;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +55,9 @@ public class MailSender extends Activity {
 	    if (dbAdapter == null)
         	dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 	    
+	    ifSent = (TextView) findViewById(R.id.sentLabel);
+	    ifSent.setVisibility(View.INVISIBLE);
+	    
 	    to = (EditText) findViewById(R.id.to);
 	    cc = (EditText) findViewById(R.id.cc);
 	    bcc = (EditText) findViewById(R.id.bcc);
@@ -55,8 +67,14 @@ public class MailSender extends Activity {
 	    
 	    emailId = savedInstanceState != null ? savedInstanceState.getLong(Emails._ID) : null;
 		if (emailId == null) {
-			Bundle extras = getIntent().getExtras();            
-			emailId = extras != null ? extras.getLong(Emails._ID) : null;
+			Bundle extras = getIntent().getExtras();  
+			if (extras != null) {
+				emailId =  extras.getLong(Emails._ID);
+				sendingType = extras.getString(FORWARD);
+				if (sendingType == null)
+					sendingType = extras.getString(REPLY);
+			}
+			
 		}
 	}
 	
@@ -133,7 +151,17 @@ public class MailSender extends Activity {
             	to.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.ADDRESSEE)));
                 cc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CC)));
                 bcc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.BCC)));
-                subject.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
+                String deliverDate = cursor.getString(cursor.getColumnIndexOrThrow(Emails.DELIVER_DATE));
+                if (deliverDate != null || FORWARD.equals(sendingType)) {
+                	subject.setText("FWD: " + cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
+                	to.setText("");
+                }
+                else if (REPLY.equals(sendingType)) {
+                	subject.setText("RE: " + cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
+                	to.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.SENDER)));
+                }              	
+                else
+                	subject.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
                 contents.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CONTENTS)));
             }
             else {
@@ -160,7 +188,7 @@ public class MailSender extends Activity {
 	    		emailData.put(Emails.DELIVER_DATE, deliverDate.toGMTString());
 	    }
 	    if (emailData != null && emailData.containsKey(Emails.ADDRESSEE)) {
-	    	if (emailId == null) {
+	    	if (emailId == null || sendingType != null) {
 	            long id = dbAdapter.saveEmail(emailData);
 	            if (id > 0) {
 	            	emailId = id;
@@ -177,7 +205,19 @@ public class MailSender extends Activity {
 		startManagingCursor(cursor);
 		if (cursor.moveToFirst()) {
 			String defaultAddress = cursor.getString(cursor.getColumnIndex(Accounts.ADDRESS));
+			String user = cursor.getString(cursor.getColumnIndex(Accounts.USER));
 			String password = cursor.getString(cursor.getColumnIndex(Accounts.PASS));
+			String server = cursor.getString(cursor.getColumnIndex(Accounts.OUTGOING_SERVER));
+			String port = cursor.getString(cursor.getColumnIndex(Accounts.OUTGOING_PORT));
+			String security = cursor.getString(cursor.getColumnIndex(Accounts.OUTGOING_SECURITY));
+			Map<String,String> accountData = new HashMap<String,String>();
+			accountData.put("address", defaultAddress);
+			accountData.put("user", user);
+			accountData.put("password", password);
+			accountData.put("server", server);
+			accountData.put("port", port);
+			accountData.put("security", security);
+			
 			String subject = this.subject.getText().toString();
 			String contents = this.contents.getText().toString();
 			String to = this.to.getText().toString();
@@ -185,9 +225,11 @@ public class MailSender extends Activity {
 			String bcc = this.bcc.getText().toString();
 			
 			try { 
-				GMailAuthenticator sender = new GMailAuthenticator(defaultAddress, password);
-	            sender.sendMail(subject, contents, defaultAddress, to);   
-	            deliverDate = new Timestamp(new Date().getTime());
+				MailAuthenticator sender = new MailAuthenticator(accountData, MailAuthenticator.SEND);
+	            if (sender.sendMail(subject, contents, defaultAddress, to, cc, bcc)) {
+	            	 deliverDate = new Timestamp(new Date().getTime());            	
+	            	 ifSent.setVisibility(View.VISIBLE);
+	            }
 	            
 	        } catch (Exception e) {   
 	            Log.e(TAG, "Error during trying to send e-mail! " + e.getMessage(), e);   
