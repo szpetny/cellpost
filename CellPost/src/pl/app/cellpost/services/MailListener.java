@@ -39,7 +39,8 @@ public class MailListener extends Service {
 	private static final String RECENT = "RECENT";
 	private static final String[] accountTypes = {"POP3", "IMAP"};
 	
-	private final List<HashMap<String, String>> accounts = new ArrayList<HashMap<String, String>>();
+	private final List<HashMap<String, String>> accounts 
+							= new ArrayList<HashMap<String, String>>();
 	
 	private String user = null;
 	private String password = null;
@@ -91,14 +92,22 @@ public class MailListener extends Service {
 		HashMap<String, String> account = null;
 		if (cursor.moveToFirst()) {
 			 do {
-				address = cursor.getString(cursor.getColumnIndex(Accounts.ADDRESS));
-				user = cursor.getString(cursor.getColumnIndex(Accounts.USER));
-				password = cursor.getString(cursor.getColumnIndex(Accounts.PASS));
-				server = cursor.getString(cursor.getColumnIndex(Accounts.INCOMING_SERVER));
-				port = cursor.getString(cursor.getColumnIndex(Accounts.INCOMING_PORT));
-				security = cursor.getString(cursor.getColumnIndex(Accounts.INCOMING_SECURITY));
-				deleteEmails = cursor.getString(cursor.getColumnIndex(Accounts.DELETE_EMAILS));
-				accountType = cursor.getString(cursor.getColumnIndex(Accounts.ACCOUNT_TYPE));
+				address = cursor.getString(
+						cursor.getColumnIndex(Accounts.ADDRESS));
+				user = cursor.getString(
+						cursor.getColumnIndex(Accounts.USER));
+				password = cursor.getString(
+						cursor.getColumnIndex(Accounts.PASS));
+				server = cursor.getString(
+						cursor.getColumnIndex(Accounts.INCOMING_SERVER));
+				port = cursor.getString(
+						cursor.getColumnIndex(Accounts.INCOMING_PORT));
+				security = cursor.getString(
+						cursor.getColumnIndex(Accounts.INCOMING_SECURITY));
+				deleteEmails = cursor.getString(
+						cursor.getColumnIndex(Accounts.DELETE_EMAILS));
+				accountType = cursor.getString(
+						cursor.getColumnIndex(Accounts.ACCOUNT_TYPE));
 				account = new HashMap<String, String>();
 				account.put("address", address);
 				account.put("user", user);

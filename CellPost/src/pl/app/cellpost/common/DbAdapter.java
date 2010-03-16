@@ -1,10 +1,7 @@
-/**
- * 
- */
 package pl.app.cellpost.common;
 
 /**
- * @author szpetny
+ * @author M.Stellert
  *
  */
 import pl.app.cellpost.common.CellPostInternals.Accounts;
@@ -39,34 +36,34 @@ public class DbAdapter {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL("CREATE TABLE accounts (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-											   "ADDRESS TEXT NOT NULL, " +
-											   "USER TEXT, " +
-											   "PASS TEXT, " +
-											   "ACCOUNT_TYPE TEXT, " +
-											   "INCOMING_SERVER TEXT, " +
-											   "INCOMING_PORT NUMERIC, " +
-											   "INCOMING_SECURITY TEXT, " +
-											   "DELETE_EMAILS NUMERIC, " +
-											   "OUTGOING_SERVER TEXT, " +
-											   "OUTGOING_PORT NUMERIC, " +
-											   "OUTGOING_SECURITY TEXT," +
-											   "DEFAULT_ACCOUNT TEXT, " +
-											   "NICK TEXT); ");
-					
-			db.execSQL("CREATE TABLE emails (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-											 "SENDER TEXT, " +
-											 "ADDRESSEE TEXT NOT NULL, " +
-											 "CC TEXT, " +
-											 "BCC TEXT, " +
-											 "SUBJECT TEXT, " +
-											 "CONTENTS TEXT, " +
-											 "ATTACHMENT BLOB, " +
-											 "CREATE_DATE TIMESTAMP, " +
-											 "MODIFY_DATE TIMESTAMP, " +
-											 "DELIVER_DATE TIMESTAMP " +
-											 "RECEIVE_DATE TIMESTAMP);");
-					
+			db.execSQL("CREATE TABLE accounts " +
+					"(_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+							   "ADDRESS TEXT NOT NULL, " +
+							   "USER TEXT, " +
+							   "PASS TEXT, " +
+							   "ACCOUNT_TYPE TEXT, " +
+							   "INCOMING_SERVER TEXT, " +
+							   "INCOMING_PORT NUMERIC, " +
+							   "INCOMING_SECURITY TEXT, " +
+							   "DELETE_EMAILS TEXT, " +
+							   "OUTGOING_SERVER TEXT, " +
+							   "OUTGOING_PORT NUMERIC, " +
+							   "OUTGOING_SECURITY TEXT," +
+							   "DEFAULT_ACCOUNT TEXT, " +
+							   "NICK TEXT); ");		
+			db.execSQL("CREATE TABLE emails " +
+					"(_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+							 "SENDER TEXT, " +
+							 "ADDRESSEE TEXT NOT NULL, " +
+							 "CC TEXT, " +
+							 "BCC TEXT, " +
+							 "SUBJECT TEXT, " +
+							 "CONTENTS TEXT, " +
+							 "ATTACHMENT BLOB, " +
+							 "CREATE_DATE TIMESTAMP, " +
+							 "MODIFY_DATE TIMESTAMP, " +
+							 "DELIVER_DATE TIMESTAMP " +
+							 "RECEIVE_DATE TIMESTAMP);");
 		}
 		
 	    @Override
@@ -160,8 +157,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAccount(long accountId) throws SQLException {
 	
-		Cursor cursor = db.query(true, Accounts.TABLE_NAME, new String[] {"*"}, Accounts._ID + "=" + accountId, 
-				null, null, null, null, null);
+		Cursor cursor = db.query(true, Accounts.TABLE_NAME, new String[] {"*"}, 
+				Accounts._ID + "=" + accountId, null, null, null, null, null);
 		if (cursor != null) {
 			cursor.moveToFirst();
 		}
@@ -177,8 +174,10 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAccountsToGetMail() throws SQLException {	
 		Cursor cursor = db.query(true, Accounts.TABLE_NAME, 
-				new String[] {Accounts.ADDRESS, Accounts.INCOMING_SERVER, Accounts.INCOMING_PORT, Accounts.INCOMING_SECURITY, 
-				Accounts.USER, Accounts.PASS, Accounts.DELETE_EMAILS, Accounts.ACCOUNT_TYPE}, 
+				new String[] {Accounts.ADDRESS, Accounts.INCOMING_SERVER, 
+				Accounts.INCOMING_PORT, Accounts.INCOMING_SECURITY, 
+				Accounts.USER, Accounts.PASS, Accounts.DELETE_EMAILS, 
+				Accounts.ACCOUNT_TYPE}, 
 				"(" + Accounts.INCOMING_SERVER + " is not null) AND " +
 				"(" + Accounts.INCOMING_PORT + " is not null) AND " +
 				"(" + Accounts.INCOMING_SECURITY + " is not null)",
@@ -197,8 +196,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchDefaultAccount() throws SQLException {
 	
-		Cursor cursor = db.query(true, Accounts.TABLE_NAME, new String[] {"*"}, Accounts.DEFAULT + "= 'true'", 
-				null, null, null, null, null);
+		Cursor cursor = db.query(true, Accounts.TABLE_NAME, new String[] {"*"}, 
+				Accounts.DEFAULT + "= 'true' ", null, null, null, null, null);
 		return cursor;	
 	}
 
@@ -212,23 +211,35 @@ public class DbAdapter {
 	*/
 	public boolean updateAccount(long accountId, ContentValues accountParams) {
 		setAccountAsDefault(accountId, accountParams);
-		return db.update(Accounts.TABLE_NAME, accountParams, Accounts._ID + "=" + accountId, null) > 0;
+		return db.update(Accounts.TABLE_NAME, accountParams, 
+				Accounts._ID + "=" + accountId, null) > 0;
 	}
 	
 	/**
 	* As cannot be two accounts set as default, 
 	* to unable this situation this method checks if new configured account should be default.
 	* When true, sets other accounts to NOT DEFAULT.
+	* Also if there is no default account, 
+	* method adds parameter DEFAULT set to true to current accountParams
 	*
 	* @param accountId id of new configured account 
 	* @param accountParams to parameters of new configured account 
 	*/
-	public void setAccountAsDefault(long accountId, ContentValues accountParams) {
-		if (accountParams.get(Accounts.DEFAULT) != null && "true".equals(accountParams.get(Accounts.DEFAULT).toString())) {
-			ContentValues defaultParam = new ContentValues();
-			defaultParam.put(Accounts.DEFAULT, "false");
-			db.update(Accounts.TABLE_NAME, defaultParam, Accounts._ID + " != " + accountId, null);
+	private void setAccountAsDefault(long accountId, ContentValues accountParams) {
+		Cursor c = fetchDefaultAccount();
+		if (c.moveToFirst()) {
+			if (accountParams.get(Accounts.DEFAULT) != null 
+					&& "true".equals(accountParams.get(Accounts.DEFAULT).toString())) {
+				ContentValues defaultParam = new ContentValues();
+				defaultParam.put(Accounts.DEFAULT, "false");
+				db.update(Accounts.TABLE_NAME, defaultParam, 
+						Accounts._ID + " != " + accountId, null);
+			}
 		}
+		else {
+			accountParams.put(Accounts.DEFAULT, "true");
+		}
+		c.close();
 	}
 	
 	/**
@@ -240,7 +251,8 @@ public class DbAdapter {
 	public boolean checkUnique(String accountName) {
 			Cursor c = null;
 			try {
-				c = db.rawQuery("SELECT _ID, ADDRESS FROM accounts WHERE ADDRESS = %s", new String[] {accountName}); 				
+				c = db.rawQuery("SELECT _ID, ADDRESS FROM accounts WHERE ADDRESS = %s", 
+						new String[] {accountName}); 				
 			} catch (SQLiteException sqle) {
 				throw new SQLException("CHUJ!");
 			}
@@ -307,7 +319,8 @@ public class DbAdapter {
 	}
 	
 	/**
-	* Return a Cursor over the list of all received emails from all configured accounts in the database
+	* Return a Cursor over the list of all received emails from 
+	* all configured accounts in the database
 	*
 	* @return Cursor over all emails
 	*/
@@ -323,7 +336,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAllDrafts() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
-				Emails.DELIVER_DATE + " is null OR " + Emails.MODIFY_DATE + " is not null ", null, null, null, null);
+				Emails.DELIVER_DATE + " is null OR " + 
+				Emails.MODIFY_DATE + " is not null ", null, null, null, null);
 	}
 
 	/**
@@ -335,8 +349,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchEmail(long emailId) throws SQLException {
 	
-		Cursor cursor = db.query(true, Emails.TABLE_NAME, new String[] {"*"}, Emails._ID + "=" + emailId, 
-				null, null, null, null, null);
+		Cursor cursor = db.query(true, Emails.TABLE_NAME, new String[] {"*"}, 
+				Emails._ID + "=" + emailId, null, null, null, null, null);
 		if (cursor != null) {
 			cursor.moveToFirst();
 		}
@@ -352,7 +366,8 @@ public class DbAdapter {
 	* @return true if the email was successfully updated, false otherwise
 	*/
 	public boolean updateSavedEmail(long emailId, ContentValues emailParams) {
-		return db. update(Emails.TABLE_NAME, emailParams, Emails._ID + "=" + emailId, null) > 0;
+		return db. update(Emails.TABLE_NAME, emailParams,
+				Emails._ID + "=" + emailId, null) > 0;
 	}
 
 

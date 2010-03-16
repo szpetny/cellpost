@@ -183,9 +183,11 @@ public class AccountConfig extends Activity {
     		accountData.put(Accounts.ADDRESS, addressText.getText().toString());
         	accountData.put(Accounts.USER, userText.getText().toString());
     	    String password = null;
-    	    if (passText.getText() != null && "".equals(passText.getText()) == false)
+    	    if (passText.getText() != null && "".equals(passText.getText()) == false) {
     	    	password = passText.getText().toString();	
-    	    accountData.put(Accounts.PASS, password);//szyfrPassword(password));
+        	    accountData.put(Accounts.PASS, password);//szyfrPassword(password));
+    	    }
+    	    	
         	accountData.put(Accounts.INCOMING_SERVER, incomingServerText.getText().toString());
     		accountData.put(Accounts.INCOMING_PORT, incomingPortText.getText().toString());
     		accountData.put(Accounts.INCOMING_SECURITY, inSecurityAdapter.getItem(incomingSecurityOption.getSelectedItemPosition()).toString());

@@ -112,8 +112,8 @@ public class Drafts extends ListActivity {
 				Cursor c = dbAdapter.fetchAllDrafts();
 				startManagingCursor(c);
 				if (c.moveToFirst()) {
-					ListAdapter adapter = new  SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.list_single_row, 
-							c, new String[]{Emails.ADDRESSEE}, new int []{R.id.singleRow});     
+					ListAdapter adapter = new  SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.list_single_2lines_row, 
+							c, new String[]{Emails.ADDRESSEE, Emails.SUBJECT}, new int[] {R.id.firstValue, R.id.secondValue});
 					setListAdapter(adapter);
 					registerForContextMenu(getListView());
 				}

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <!--<string-array name="main_menu">
+        <item>Inbox</item>
+        <item>Send e-mail</item>
+        <item>Drafts</item>
+        <item>Sent</item>
+        <item>Settings</item>
+    </string-array> 
+    
+    <string-array name="settings_menu">
+        <item>Accounts</item>
+        <item>User preferences</item>
+    </string-array> 
+    
+    <string-array name="account_conf_account_types">
+        <item>POP3</item>
+        <item>IMAP</item>
+    </string-array>
+    
+    <string-array name="account_conf_security_options">
+        <item>None</item>
+        <item>SSL</item>
+        <item>TLS</item>
+    </string-array>
+    
+    <string-array name="delete_from_serv_options">
+        <item>Never</item>
+        <item>Yes</item>
+        <item>When I delete from Inbox</item>
+    </string-array>
+    
+    <string-array name="new_emails_check">
+        <item>Never</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+    </string-array>
+    
+--></resources>
