@@ -1,34 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent" 
-                android:layout_height="fill_parent"
-                android:padding="10px"
-                android:isScrollContainer="true" 
-                android:scrollbars="vertical"
-                android:scrollbarAlwaysDrawVerticalTrack="true" >
+                style="@style/CellPostFormLayoutStyle">
                 
 	<RelativeLayout android:layout_width="fill_parent" 
 	                android:layout_height="wrap_content">   
 	                 
 	    <TextView android:id="@+id/defAccLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
+	              android:layout_height="wrap_content"
 	              android:text="@string/settin_default_acc" />
 	
-	   <Spinner android:id="@+id/defaultAccount" 
+	    <Spinner android:id="@+id/defaultAccount" 
 	    		 android:layout_height="wrap_content" 
 	    		 android:layout_below="@id/defAccLabel" 
 	    		 android:layout_width="fill_parent"/>
 	
 		<CheckBox android:id="@+id/newEmailsNotif" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormCheckboxStyle" 
 	              android:text="@string/settin_notify_new_emails" 
 	              android:layout_below="@id/defaultAccount" />  
 	
 		<TextView android:id="@+id/newEmailsCheckLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/settin_check_4_emails" 
 	              android:layout_below="@id/newEmailsNotif" />
 	              

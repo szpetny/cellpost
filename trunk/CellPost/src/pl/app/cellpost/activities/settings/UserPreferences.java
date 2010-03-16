@@ -1,9 +1,13 @@
 package pl.app.cellpost.activities.settings;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -24,6 +28,7 @@ public class UserPreferences extends Activity {
     private DbAdapter dbAdapter;
     private ArrayAdapter<String> defaultAccountAdapter;
     private ArrayAdapter<CharSequence> newEmailsCheckAdapter;
+    private Map<String,Long> idsAccountsPairs = new HashMap<String,Long>();
     
     private static final String DEFAULT_ACCOUNT = "DEFAULT_ACCOUNT";
     private static final String NEW_EMAILS_CHECK = "NEW_EMAILS_CHECK";
@@ -34,10 +39,6 @@ public class UserPreferences extends Activity {
         super.onCreate(savedInstanceState);
         if (dbAdapter == null)
         	dbAdapter = new DbAdapter(this);
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.clear();
-        editor.commit();
         
         setContentView(R.layout.user_prefs_config_look);
    
@@ -47,15 +48,17 @@ public class UserPreferences extends Activity {
         defaultAccount = (Spinner) findViewById(R.id.defaultAccount);
         defaultAccountAdapter = new  ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
         defaultAccountAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        defaultAccount.setAdapter(defaultAccountAdapter);
-        
         if (c.moveToFirst()) {
             do {
-            	defaultAccountAdapter.add(c.getString(c.getColumnIndexOrThrow(Accounts.ADDRESS)));
+            	defaultAccountAdapter. add(c.getString(c.getColumnIndexOrThrow(Accounts.ADDRESS)));
+            	
+            	idsAccountsPairs.put(c.getString(c.getColumnIndexOrThrow(Accounts.ADDRESS)),
+            				c.getLong(c.getColumnIndexOrThrow(Accounts._ID)));
 	        }
 	        while (c.moveToNext());
         }
-        
+        defaultAccount.setAdapter(defaultAccountAdapter);
+ 
         newEmailsCheck = (Spinner) findViewById(R.id.newEmailsCheck);
         newEmailsCheckAdapter = ArrayAdapter.createFromResource(
                 this, R.array.new_emails_check, android.R.layout.simple_spinner_item);
@@ -80,15 +83,15 @@ public class UserPreferences extends Activity {
     
     private void populateFields() {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String defaultAccountVal = settings.getString(DEFAULT_ACCOUNT, "NONE");
+        String defaultAccountVal = settings.getString(DEFAULT_ACCOUNT, "BLE");
         Long newEmailsCheckLongVal = settings.getLong(NEW_EMAILS_CHECK, 30L);
         String newEmailsCheckVal;
         if (newEmailsCheckLongVal.equals(60L)) {
         	newEmailsCheckLongVal /= 60;
-        	newEmailsCheckVal = newEmailsCheckLongVal + " hour";
+        	newEmailsCheckVal = newEmailsCheckLongVal + " godzinê";
         }
         else {
-        	newEmailsCheckVal = newEmailsCheckLongVal + " minutes";
+        	newEmailsCheckVal = newEmailsCheckLongVal + " minut";
         }
         boolean newEmailsNotifVal = settings.getBoolean(NEW_EMAILS_NOTIFICATION, true);
         defaultAccount.setSelection(defaultAccountAdapter.getPosition(defaultAccountVal));   
@@ -125,18 +128,32 @@ public class UserPreferences extends Activity {
     }
     
     private void saveState() {
-    	 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-         SharedPreferences.Editor editor = settings.edit();
-         editor.putString(DEFAULT_ACCOUNT, defaultAccountAdapter.getItem(defaultAccount.getSelectedItemPosition()).toString());
-         String tmpVal = newEmailsCheckAdapter.getItem(newEmailsCheck.getSelectedItemPosition()).toString();
-         tmpVal = tmpVal.substring(0, tmpVal.indexOf(" "));
-         Long checkEmailsPeriod = new Long(tmpVal);
-         if (checkEmailsPeriod.equals(1L)) {
-        	 checkEmailsPeriod *= 60;
-         }
-         editor.putLong(NEW_EMAILS_CHECK, checkEmailsPeriod);
-         editor.putBoolean(NEW_EMAILS_NOTIFICATION, newEmailsNotif.isChecked() ? true : false);
-         editor.commit();
+    	String newDefaultAccount = defaultAccountAdapter.getItem(
+       		 defaultAccount.getSelectedItemPosition()).toString();
+    	ContentValues trueValue = new ContentValues();
+    	trueValue.put(Accounts.DEFAULT, "true");
+    	if (dbAdapter.updateAccount(idsAccountsPairs.get(newDefaultAccount), trueValue)) {
+    		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(DEFAULT_ACCOUNT, newDefaultAccount);
+            String tmpVal = newEmailsCheckAdapter.getItem(
+           		 newEmailsCheck.getSelectedItemPosition()).toString();
+            if ("Nigdy".equals(tmpVal) == false) {
+           	 tmpVal = tmpVal.substring(0, tmpVal.indexOf(" "));
+                Long checkEmailsPeriod = new Long(tmpVal);
+                if (checkEmailsPeriod.equals(1L)) {
+               	 checkEmailsPeriod *= 60;
+                }
+                editor.putLong(NEW_EMAILS_CHECK, checkEmailsPeriod);
+            }
+            else {
+           	 editor.putLong(NEW_EMAILS_CHECK, 0L);
+            }
+            editor.putBoolean(NEW_EMAILS_NOTIFICATION, 
+           		 newEmailsNotif.isChecked() ? true : false);
+            editor.commit();
+    	}
+    	 
 
     }
     

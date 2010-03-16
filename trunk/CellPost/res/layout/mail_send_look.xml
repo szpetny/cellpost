@@ -1,25 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent" 
-                android:layout_height="fill_parent"
-                android:padding="10px"
-                android:isScrollContainer="true" 
-                android:scrollbars="vertical"
-                android:scrollbarAlwaysDrawVerticalTrack="true" >
+                style="@style/CellPostFormLayoutStyle">
                 
 	<RelativeLayout android:layout_width="fill_parent" 
 	                android:layout_height="wrap_content">   
 	                
 	    <TextView android:id="@+id/sentLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelSmallerStyle"
 	              android:background="@color/orange"
 	              android:visibility="invisible"
 	              android:text="@string/mail_if_sent" />
 	                 
 	    <TextView android:id="@+id/toLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelSmallerStyle"
 	              android:layout_below="@id/sentLabel"
 	              android:text="@string/mail_to" />
 	
@@ -30,8 +23,7 @@
 	              android:layout_below="@id/toLabel" />
 	              
 	    <TextView android:id="@+id/ccLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelSmallerStyle"
 	              android:text="@string/mail_cc" 
 	              android:layout_below="@id/to"/>
 	
@@ -42,8 +34,7 @@
 	              android:layout_below="@id/ccLabel" />
 	              
 	    <TextView android:id="@+id/bccLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelSmallerStyle"
 	              android:text="@string/mail_bcc" 
 	              android:layout_below="@id/cc" />
 	
@@ -54,8 +45,7 @@
 	              android:layout_below="@id/bccLabel" />
 	              
 	    <TextView android:id="@+id/subjectLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelSmallerStyle"
 	              android:text="@string/mail_subject" 
 	              android:layout_below="@id/bcc" />
 	
@@ -66,8 +56,7 @@
 	              android:layout_below="@id/subjectLabel" />          
 	              
 	    <TextView android:id="@+id/contentsLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelSmallerStyle"
 	              android:text="@string/mail_contents" 
 	              android:layout_below="@id/subject" />
 	

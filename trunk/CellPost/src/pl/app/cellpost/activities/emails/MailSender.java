@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pl.app.cellpost.R;
+import pl.app.cellpost.activities.main.CellPostMain;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import pl.app.cellpost.common.CellPostInternals.Emails;
 import pl.app.cellpost.logic.MailAuthenticator;
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -104,6 +106,7 @@ public class MailSender extends Activity {
 	            
 	        case SAVE_ID:
 	        	saveMail();
+	        	startActivity(new Intent(this, CellPostMain.class));
 	            return true;
 	            
 	        case DELETE_ID:
@@ -129,7 +132,7 @@ public class MailSender extends Activity {
     protected void onResume() {
         super.onResume();
         if (dbAdapter == null)
-        	dbAdapter = new DbAdapter(getApplication().getApplicationContext());
+        	dbAdapter = new DbAdapter(this);
         populateFields();
     }
     
@@ -148,21 +151,30 @@ public class MailSender extends Activity {
             Cursor cursor = dbAdapter.fetchEmail(emailId);
             startManagingCursor(cursor);
             if (cursor.moveToFirst()) {
-            	to.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.ADDRESSEE)));
-                cc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CC)));
-                bcc.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.BCC)));
-                String deliverDate = cursor.getString(cursor.getColumnIndexOrThrow(Emails.DELIVER_DATE));
+            	to.setText(cursor.getString(
+            			cursor.getColumnIndexOrThrow(Emails.ADDRESSEE)));
+                cc.setText(cursor.getString(
+                		cursor.getColumnIndexOrThrow(Emails.CC)));
+                bcc.setText(cursor.getString(
+                		cursor.getColumnIndexOrThrow(Emails.BCC)));
+                String deliverDate = cursor.getString(
+                		cursor.getColumnIndexOrThrow(Emails.DELIVER_DATE));
                 if (deliverDate != null || FORWARD.equals(sendingType)) {
-                	subject.setText("FWD: " + cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
+                	subject.setText("FWD: " + cursor.getString(
+                			cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
                 	to.setText("");
                 }
                 else if (REPLY.equals(sendingType)) {
-                	subject.setText("RE: " + cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
-                	to.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.SENDER)));
+                	subject.setText("RE: " + cursor.getString(
+                			cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
+                	to.setText(cursor.getString(
+                			cursor.getColumnIndexOrThrow(Emails.SENDER)));
                 }              	
                 else
-                	subject.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
-                contents.setText(cursor.getString(cursor.getColumnIndexOrThrow(Emails.CONTENTS)));
+                	subject.setText(cursor.getString(
+                			cursor.getColumnIndexOrThrow(Emails.SUBJECT)));
+                contents.setText(cursor.getString(
+                		cursor.getColumnIndexOrThrow(Emails.CONTENTS)));
             }
             else {
             	Log.e(TAG, "The database crash or sth...");
@@ -204,12 +216,18 @@ public class MailSender extends Activity {
 		Cursor cursor = dbAdapter.fetchDefaultAccount();
 		startManagingCursor(cursor);
 		if (cursor.moveToFirst()) {
-			String defaultAddress = cursor.getString(cursor.getColumnIndex(Accounts.ADDRESS));
-			String user = cursor.getString(cursor.getColumnIndex(Accounts.USER));
-			String password = cursor.getString(cursor.getColumnIndex(Accounts.PASS));
-			String server = cursor.getString(cursor.getColumnIndex(Accounts.OUTGOING_SERVER));
-			String port = cursor.getString(cursor.getColumnIndex(Accounts.OUTGOING_PORT));
-			String security = cursor.getString(cursor.getColumnIndex(Accounts.OUTGOING_SECURITY));
+			String defaultAddress = cursor.getString(
+					cursor.getColumnIndex(Accounts.ADDRESS));
+			String user = cursor.getString(
+					cursor.getColumnIndex(Accounts.USER));
+			String password = cursor.getString(
+					cursor.getColumnIndex(Accounts.PASS));
+			String server = cursor.getString(
+					cursor.getColumnIndex(Accounts.OUTGOING_SERVER));
+			String port = cursor.getString(
+					cursor.getColumnIndex(Accounts.OUTGOING_PORT));
+			String security = cursor.getString(
+					cursor.getColumnIndex(Accounts.OUTGOING_SECURITY));
 			Map<String,String> accountData = new HashMap<String,String>();
 			accountData.put("address", defaultAddress);
 			accountData.put("user", user);
@@ -224,17 +242,14 @@ public class MailSender extends Activity {
 			String cc = this.cc.getText().toString();
 			String bcc = this.bcc.getText().toString();
 			
-			try { 
-				MailAuthenticator sender = new MailAuthenticator(accountData, MailAuthenticator.SEND);
-	            if (sender.sendMail(subject, contents, defaultAddress, to, cc, bcc)) {
-	            	 deliverDate = new Timestamp(new Date().getTime());            	
-	            	 ifSent.setVisibility(View.VISIBLE);
-	            }
-	            
-	        } catch (Exception e) {   
-	            Log.e(TAG, "Error during trying to send e-mail! " + e.getMessage(), e);   
-	        } 
-	        
+			
+			MailAuthenticator sender = 
+				new MailAuthenticator(accountData, MailAuthenticator.SEND);
+	        if (sender.sendMail(subject, contents, defaultAddress, to, cc, bcc)) {
+	            deliverDate = new Timestamp(new Date().getTime());            	
+	            ifSent.setVisibility(View.VISIBLE);
+	        }
+
 		}
 
 		else {
@@ -248,17 +263,14 @@ public class MailSender extends Activity {
 		if (emailId != null) {
 			dbAdapter.deleteEmail(emailId);
 		}
-		else {
-			to.setText("");
-		    cc.setText("");
-		    bcc.setText("");
-		    subject.setText("");
-		    contents.setText("");
-		    attachment = null;
-		    creationDate = null;
-		    modificationDate = null;
-		    deliverDate = null;
-
-		}
+		to.setText("");
+	    cc.setText("");
+	    bcc.setText("");
+	    subject.setText("");
+	    contents.setText("");
+	    attachment = null;
+	    creationDate = null;
+	    modificationDate = null;
+	    deliverDate = null;
 	}
 }

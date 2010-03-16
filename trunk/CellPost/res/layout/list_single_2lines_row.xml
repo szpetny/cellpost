@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent" 
-     	android:layout_height="wrap_content">
+		style="@style/CellPostFormLayoutStyle">
 	<TextView android:id="@+id/firstValue"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"/>
+	    style="@style/CellPostListItemStyle"/>
 	<TextView android:id="@+id/secondValue" 
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
+	    style="@style/CellPostListItemStyle"
 	    android:layout_below="@id/firstValue"/>
 </RelativeLayout>

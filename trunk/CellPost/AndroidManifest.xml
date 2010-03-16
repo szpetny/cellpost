@@ -7,7 +7,7 @@
         <uses-library android:name="android.test.runner" />
         
         <activity android:name=".activities.main.CellPostMain"
-                  android:label="@string/app_name">
+                  android:label="@string/app_name" style="@style/CellPostFormLabelStyle">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

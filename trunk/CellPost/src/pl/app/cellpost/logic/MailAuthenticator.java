@@ -26,6 +26,7 @@ import javax.mail.internet.MimeMessage;
 
 import android.util.Log;
 
+import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.pop3.POP3Folder;
 
 public class MailAuthenticator extends javax.mail.Authenticator {
@@ -48,10 +49,8 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 	private String provider = null; 
 	private String deleteEmails = null;
 	
-	//private static final String smtphost = "smtp.gmail.com";
-	
 	private static Map<String,String> receiveProviders;
-	private String[] deleteEmailsOptions = {"Yes ", "Never", "When I delete from Inbox"};
+	private String[] deleteEmailsOptions = {"Tak ", "Nigdy", "Po usuniêciu ze skrzynki odbiorczej"};
 	
 	private Store store = null;
 	private Folder folder = null, inbox = null;
@@ -100,14 +99,16 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 			provider = (String)accountData.get("provider");
 			deleteEmails = (String) accountData.get("deleteEmails");
 			
-			if (SSL.equals(security) && POP3.equals(provider) && deleteEmailsOptions[0].equals(deleteEmails)) {
+			if (SSL.equals(security) && POP3.equals(provider) 
+					&& deleteEmailsOptions[0].equals(deleteEmails)) {
 				props.setProperty("mail.pop3s.rsetbeforequit","true");
 			}
 			else if (SSL.equals(security) && POP3.equals(provider)) {
 				props.setProperty("mail.pop3s.rsetbeforequit","false");
 			}
 			
-			else if (NONE.equals(security) && POP3.equals(provider) && deleteEmailsOptions[0].equals(deleteEmails)) {
+			else if (NONE.equals(security) && POP3.equals(provider) 
+					&& deleteEmailsOptions[0].equals(deleteEmails)) {
 				props.setProperty("mail.pop3.rsetbeforequit","true");
 			}
 			else if (NONE.equals(security) && POP3.equals(provider)) {
@@ -125,31 +126,37 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 	}   
 	
 	
-	public synchronized boolean sendMail(String subject, String body, String sender, String to, String cc, String bcc) {   
+	public synchronized boolean sendMail(String subject, String body, 
+			String sender, String to, String cc, String bcc) {   
 	    try{
 		    MimeMessage message = new MimeMessage(session);   
-		    DataHandler handler = new DataHandler((DataSource) new ByteArrayDataSource(body.getBytes(), "text/plain"));   
+		    DataHandler handler = new DataHandler(
+		    		(DataSource) new ByteArrayDataSource(body.getBytes(), "text/plain"));   
 		    message.setSender(new InternetAddress(sender));   
 		    message.setSubject(subject);   
 		    message.setDataHandler(handler);   
-		    if (to.indexOf(',') > 0)   
-		        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));   
-		    else  
-		        message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));   
+		    if ("".equals(to) == false)
+		    	if (to.indexOf(',') > 0)   
+			        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));   
+			    else  
+			        message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));   
 		    
-		    if (cc.indexOf(',') > 0)   
-		        message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(cc));   
-		    else  
-		        message.setRecipient(Message.RecipientType.CC, new InternetAddress(cc));   
+		    if ("".equals(cc) == false)
+			    if (cc.indexOf(',') > 0)   
+			        message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(cc));   
+			    else  
+			        message.setRecipient(Message.RecipientType.CC, new InternetAddress(cc));   
 		    
-		    if (bcc.indexOf(',') > 0)   
-		        message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(bcc));   
-		    else  
-		        message.setRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));   
+		    if ("".equals(bcc) == false)
+			    if (bcc.indexOf(',') > 0)   
+			        message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(bcc));   
+			    else  
+			        message.setRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));   
+		    
 		    Transport.send(message);   
 		    return true;
 	    } catch(Exception e){
-	    	Log.e(TAG, "Nothing sent. " + e);
+	    	Log.e(TAG, "Nothing sent. Exception occured: " + e);
 	    }
 	    
 	    return false;
@@ -177,7 +184,18 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 			
 			inbox.open(Folder.READ_WRITE);
 			
-			allEmails = inbox.getMessages();
+			POP3Folder pop3folder = null;
+			IMAPFolder imapFolder = null;
+			
+			if (POP3.equals(provider)) {
+				pop3folder = (POP3Folder) inbox;
+				allEmails = pop3folder.getMessages();
+			}
+			if (IMAP.equals(provider)) {
+				imapFolder = (IMAPFolder) inbox;
+				allEmails = imapFolder.getMessages();
+			}
+			
 			FetchProfile fp = new FetchProfile();
 			fp.add(FetchProfile.Item.ENVELOPE); 
 			fp.add(FetchProfile.Item.CONTENT_INFO); 
@@ -189,9 +207,7 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 					unreadEmails.put(Integer.valueOf(i++).toString(), email);
 				}
 			}
-			else if ( "-1".equals(whichMessages)) {
-				  POP3Folder pop3folder = (POP3Folder) inbox;
-				  allEmails = inbox.getMessages();
+			else if ( "-1".equals(whichMessages)) {			  
 				  Log.i(TAG, "previousPOP3MsgUIDL " + whichMessages);
 				  for (Message email : allEmails) {
 					  unreadEmails.put(pop3folder.getUID(email), email);
@@ -201,14 +217,14 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 				if ("RECENT".equals(whichMessages)) {
 					for (int i = 0; i < allEmails.length; i++) {
 						Log.i(TAG, "IMAP - recent");
-						Flags.Flag[] flags = allEmails[i].getFlags().getSystemFlags();
+						Flags.Flag[] flags = 
+							allEmails[i].getFlags().getSystemFlags();
 						if (flags != null) {
 							for (Flag flag : flags) {
-								if (Flags.Flag.SEEN.equals(flag)) {
-									break;
-								}
-								else {
-									unreadEmails.put(Integer.valueOf(i++).toString(), allEmails[i]);
+								if (Flags.Flag.RECENT.equals(flag)) {
+									unreadEmails.put(
+									Integer.valueOf(i++).toString(), 
+									allEmails[i]);
 								}
 							}
 						}
@@ -216,8 +232,6 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 				}
 				else {
 					  Log.i(TAG, "POP3 - recent :)");
-					  POP3Folder pop3folder = (POP3Folder) inbox;
-					  allEmails = inbox.getMessages();
 					  Log.i(TAG, "previousPOP3MsgUIDL " + whichMessages);
 					  String[] previousPOP3MsgUIDL = whichMessages.split(" ");
 					  for (Message email : allEmails) {

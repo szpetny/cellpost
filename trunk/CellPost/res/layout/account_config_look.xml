@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent" 
-                android:layout_height="fill_parent"
-                android:padding="10px"
-                android:isScrollContainer="true" 
-                android:scrollbars="vertical"
-                android:scrollbarAlwaysDrawVerticalTrack="true" >
+                style="@style/CellPostFormLayoutStyle">
                 
 	<RelativeLayout android:layout_width="fill_parent" 
 	                android:layout_height="wrap_content">   
@@ -20,33 +15,28 @@
 	              android:layout_below="@id/addressLabel" />
 	
 		<TextView android:id="@+id/userLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_user" 
 	              android:layout_below="@id/address" />
 	              
 	    <EditText android:id="@+id/user" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostEditTextStyle"
 	              android:background="@android:drawable/editbox_background"
 	              android:layout_below="@id/userLabel" />
 	
 		<TextView android:id="@+id/passLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_pass" 
 	              android:layout_below="@id/user" />
 	              
 	    <EditText android:id="@+id/pass" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content"  
+	              style="@style/CellPostEditTextStyle"
 	              android:password="true"
 	              android:background="@android:drawable/editbox_background"
 	              android:layout_below="@id/passLabel" />
 	
 		<TextView android:id="@+id/accTypeLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_account_type" 
 	              android:layout_below="@id/pass" />
 	
@@ -57,32 +47,27 @@
 	    		 android:entries="@array/account_conf_account_types" />
 		
 		<TextView android:id="@+id/incomingServerLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_in_server" 
 	              android:layout_below="@id/accountType" />
 		  
 	    <EditText android:id="@+id/incomingServer" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostEditTextStyle"
 	              android:background="@android:drawable/editbox_background"
 	              android:layout_below="@id/incomingServerLabel" />
 	              
 	    <TextView android:id="@+id/incomingPortLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_in_port" 
 	              android:layout_below="@id/incomingServer" />
 	              
 	    <EditText android:id="@+id/incomingPort" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostEditTextStyle"
 	              android:background="@android:drawable/editbox_background"
 	              android:layout_below="@id/incomingPortLabel" /> 
 	              
 	    <TextView android:id="@+id/incomingSecurityLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_in_security" 
 	              android:layout_below="@id/incomingPort" /> 
 	              
@@ -93,8 +78,7 @@
 	    		 android:entries="@array/account_conf_security_options" />
 	    		 
 	    <TextView android:id="@+id/deleteEmailsLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_delete_emails" 
 	              android:layout_below="@id/incomingSecurity" /> 
 	    		 
@@ -105,32 +89,27 @@
 	    		 android:entries="@array/delete_from_serv_options" />    		 
 	    		 
 	    <TextView android:id="@+id/outgoingServerLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_out_server"
 	              android:layout_below="@id/deleteEmails" />
 		  
 	    <EditText android:id="@+id/outgoingServer" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostEditTextStyle"
 	              android:background="@android:drawable/editbox_background"
 	              android:layout_below="@id/outgoingServerLabel" />
 	              
 	    <TextView android:id="@+id/outgoingPortLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_out_port" 
 	              android:layout_below="@id/outgoingServer" />
 	              
 	    <EditText android:id="@+id/outgoingPort" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostEditTextStyle"
 	              android:background="@android:drawable/editbox_background"
 	              android:layout_below="@id/outgoingPortLabel" /> 
 	              
 	    <TextView android:id="@+id/outgoingSecurityLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle"
 	              android:text="@string/account_conf_out_security" 
 	              android:layout_below="@id/outgoingPort" /> 
 	              
@@ -141,20 +120,17 @@
 	    		 android:entries="@array/account_conf_security_options" />
 	    		 
 	    <TextView android:id="@+id/nickLabel" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormLabelStyle" 
 	              android:text="@string/account_conf_nick" 
 	              android:layout_below="@id/outgoingSecurity" /> 		
 	              
 	    <EditText android:id="@+id/nick" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostEditTextStyle"
 	              android:background="@android:drawable/editbox_background"
 	              android:layout_below="@id/nickLabel" />  
 	             
 	    <CheckBox android:id="@+id/defaultAccount" 
-	              android:layout_width="fill_parent" 
-	              android:layout_height="wrap_content" 
+	              style="@style/CellPostFormCheckboxStyle"
 	              android:text="@string/account_conf_default" 
 	              android:layout_below="@id/nick" />  
 		

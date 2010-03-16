@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--<string-array name="main_menu">
-        <item>Inbox</item>
-        <item>Send e-mail</item>
-        <item>Drafts</item>
-        <item>Sent</item>
-        <item>Settings</item>
-    </string-array> 
-    
-    -->
     <string-array name="main_menu">
         <item>Skrzynka odbiorcza</item>
         <item>Wyślij e-mail</item>
@@ -18,8 +9,8 @@
     </string-array> 
     
     <string-array name="settings_menu">
-        <item>Accounts</item>
-        <item>User preferences</item>
+        <item>Konfiguracja kont</item>
+        <item>Ustawienia aplikacji</item>
     </string-array> 
     
     <string-array name="account_conf_account_types">
@@ -28,22 +19,22 @@
     </string-array>
     
     <string-array name="account_conf_security_options">
-        <item>None</item>
+        <item>Bez SSL</item>
         <item>SSL</item>
         <!--<item>TLS</item>
     --></string-array>
     
     <string-array name="delete_from_serv_options">
-        <item>Never</item>
-        <item>Yes</item>
-        <item>When I delete from Inbox</item>
+        <item>Nigdy</item>
+        <item>Tak</item>
+        <item>Po usunięciu ze skrzynki odbiorczej</item>
     </string-array>
     
     <string-array name="new_emails_check">
-        <item>Never</item>
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
+        <item>Nigdy</item>
+        <item>15 minut</item>
+        <item>30 minut</item>
+        <item>1 godzinę</item>
     </string-array>
     
 </resources>
