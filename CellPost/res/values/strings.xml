@@ -21,6 +21,7 @@
 	<string name="menu_save">Zapisz</string>
 	<string name="menu_reply">Odpowiedz</string>
 	<string name="menu_forward">Przekaż</string>
+	<string name="menu_refresh">Odśwież</string>
 	
 	<!-- Accounts Config Form -->
     <string name="account_conf_address">Adres e-mail</string> 
@@ -57,5 +58,8 @@
     <string name="next">Dalej</string>
     <string name="back">Powrót</string>
     <string name="send">Wyślij</string>
+    
+    <!-- Messages -->
+    <string name="emailsNotifier">NOWE EMAILE!</string>
     
 </resources>

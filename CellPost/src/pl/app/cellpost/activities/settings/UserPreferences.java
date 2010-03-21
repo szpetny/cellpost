@@ -19,8 +19,8 @@ import android.widget.Spinner;
 
 public class UserPreferences extends Activity {
 	@SuppressWarnings("unused")
-	private static final String TAG = "UserPreferences";
-	private static final String PREFS_NAME = "CellPostPrefsFile";
+	private final String TAG = "UserPreferences";
+	private final String PREFS_NAME = "CellPostPrefsFile";
 	
     private Spinner defaultAccount;
     private Spinner newEmailsCheck;
@@ -30,9 +30,9 @@ public class UserPreferences extends Activity {
     private ArrayAdapter<CharSequence> newEmailsCheckAdapter;
     private Map<String,Long> idsAccountsPairs = new HashMap<String,Long>();
     
-    private static final String DEFAULT_ACCOUNT = "DEFAULT_ACCOUNT";
-    private static final String NEW_EMAILS_CHECK = "NEW_EMAILS_CHECK";
-    private static final String NEW_EMAILS_NOTIFICATION = "NEW_EMAILS_NOTIFICATION";
+    private final String DEFAULT_ACCOUNT = "DEFAULT_ACCOUNT";
+    private final String NEW_EMAILS_CHECK = "NEW_EMAILS_CHECK";
+    private final String NEW_EMAILS_NOTIFICATION = "NEW_EMAILS_NOTIFICATION";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

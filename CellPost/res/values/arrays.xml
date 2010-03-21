@@ -19,19 +19,19 @@
     </string-array>
     
     <string-array name="account_conf_security_options">
-        <item>Bez SSL</item>
-        <item>SSL</item>
+        <item>Bez SSL/TSL</item>
+        <item>SSL/TSL</item>
         <!--<item>TLS</item>
     --></string-array>
     
     <string-array name="delete_from_serv_options">
         <item>Nigdy</item>
         <item>Tak</item>
-        <item>Po usunięciu ze skrzynki odbiorczej</item>
     </string-array>
     
     <string-array name="new_emails_check">
         <item>Nigdy</item>
+        <item>5 minut</item>
         <item>15 minut</item>
         <item>30 minut</item>
         <item>1 godzinę</item>

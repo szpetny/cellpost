@@ -125,7 +125,6 @@ public class DbAdapter {
 	* @return true if deleted, false otherwise
 	*/
 	public boolean deleteAccount(long accountId) {	
-		Log.i(TAG, "value__" + accountId);
 		return db.delete(Accounts.TABLE_NAME, Accounts._ID + "=" + accountId, null) > 0;
 	}
 	
@@ -178,9 +177,9 @@ public class DbAdapter {
 				Accounts.INCOMING_PORT, Accounts.INCOMING_SECURITY, 
 				Accounts.USER, Accounts.PASS, Accounts.DELETE_EMAILS, 
 				Accounts.ACCOUNT_TYPE}, 
-				"(" + Accounts.INCOMING_SERVER + " is not null) AND " +
-				"(" + Accounts.INCOMING_PORT + " is not null) AND " +
-				"(" + Accounts.INCOMING_SECURITY + " is not null)",
+				"(" + Accounts.INCOMING_SERVER + " != '') AND " +
+				"(" + Accounts.INCOMING_PORT + " != '') AND " +
+				"(" + Accounts.INCOMING_SECURITY + " != '')",
 				null, null, null, null, null);
 		if (cursor != null) {
 			cursor.moveToFirst();
@@ -285,7 +284,6 @@ public class DbAdapter {
 	* @return true if deleted, false otherwise
 	*/
 	public boolean deleteEmail(long emailId) {	
-		Log.i(TAG, "value__" + emailId);
 		return db.delete(Emails.TABLE_NAME, Emails._ID + "=" + emailId, null) > 0;
 	}
 	
@@ -315,7 +313,7 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAllSent() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
-				Emails.DELIVER_DATE + " is not null ", null, null, null, null);
+				Emails.DELIVER_DATE + " is not null ", null, null, null, Emails.DELIVER_DATE + " DESC");
 	}
 	
 	/**
@@ -326,7 +324,7 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAllEmailsReceived() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
-				Emails.CREATE_DATE + " is null ", null, null, null, null);
+				Emails.RECEIVE_DATE + " is not null ", null, null, null, Emails.RECEIVE_DATE + " DESC");
 	}
 	
 	/**
@@ -336,8 +334,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAllDrafts() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
-				Emails.DELIVER_DATE + " is null OR " + 
-				Emails.MODIFY_DATE + " is not null ", null, null, null, null);
+				Emails.RECEIVE_DATE + " is null AND " + 
+				Emails.DELIVER_DATE + " is null ", null, null, null, Emails.MODIFY_DATE + " DESC");
 	}
 
 	/**

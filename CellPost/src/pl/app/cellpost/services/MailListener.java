@@ -1,21 +1,28 @@
 package pl.app.cellpost.services;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Accounts;
 import pl.app.cellpost.common.CellPostInternals.Emails;
 import pl.app.cellpost.logic.MailAuthenticator;
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -24,23 +31,18 @@ import android.database.Cursor;
 import android.os.IBinder;
 import android.util.Log;
 
-public class MailListener extends Service {
+public class MailListener extends Service{
 	private final String TAG = "MailListener";
 	
 	private Timer timer = new Timer(); 
 	private MailAuthenticator receiver = null;
 	private DbAdapter dbAdapter = null;
 	
-	private static final String PREFS_NAME = "CellPostPrefsFile";
-	private static final String POP3_UIDL = "_POP3_UIDL";
-	private static final String NEW_IMAP_ACCOUNT = "_NEW_IMAP_ACCOUNT";
-	private static final String NEW_EMAILS_CHECK = "NEW_EMAILS_CHECK";
-	private static final String MAIL_LISTENER_RUNNING = "MAIL_LISTENER_RUNNING";
-	private static final String RECENT = "RECENT";
-	private static final String[] accountTypes = {"POP3", "IMAP"};
-	
-	private final List<HashMap<String, String>> accounts 
-							= new ArrayList<HashMap<String, String>>();
+	private final String PREFS_NAME = "CellPostPrefsFile";
+	private final String UIDL = "_UIDL";
+	private final String NEW_EMAILS_CHECK = "NEW_EMAILS_CHECK";
+	private final String NEW_EMAILS_NOTIFICATION = "NEW_EMAILS_NOTIFICATION";
+	private SharedPreferences settings;
 	
 	private String user = null;
 	private String password = null;
@@ -50,26 +52,31 @@ public class MailListener extends Service {
 	private String server = null;
 	private String accountType = null;
 	private String address = null;
+	private boolean newEmailsNotification = false;
+		
+	private static Activity activity;
+	
+	public static  NotificationManager mNotificationManager;
+    private int NOTIFICATION_ID = 666; 
+    private InternalWatcher watcher = new InternalWatcher();
 		
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
+	
+	public static void setMainActivity(Activity newActivity) {
+		  activity = newActivity;
+	}
 
 	@Override
 	public void onCreate() { 
 		super.onCreate(); 
-		Log.i(TAG,"Start check for emails in the moment");
+		mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); 
 		startCheckForEmails();
 
 	}
-	
-	@Override
-    public void onStart( Intent intent, int startId ) {
-	  super.onStart( intent, startId );
-	  startCheckForEmails();
-    }
-	
+		
 	@Override
 	public void onDestroy() { 
 		super.onDestroy(); 
@@ -85,142 +92,24 @@ public class MailListener extends Service {
 	}
 	
 	private void startCheckForEmails() { 
-		if (dbAdapter == null)
-        	dbAdapter = new DbAdapter(getApplication().getApplicationContext());
-		Cursor cursor = dbAdapter.fetchAccountsToGetMail();
-		
-		HashMap<String, String> account = null;
-		if (cursor.moveToFirst()) {
-			 do {
-				address = cursor.getString(
-						cursor.getColumnIndex(Accounts.ADDRESS));
-				user = cursor.getString(
-						cursor.getColumnIndex(Accounts.USER));
-				password = cursor.getString(
-						cursor.getColumnIndex(Accounts.PASS));
-				server = cursor.getString(
-						cursor.getColumnIndex(Accounts.INCOMING_SERVER));
-				port = cursor.getString(
-						cursor.getColumnIndex(Accounts.INCOMING_PORT));
-				security = cursor.getString(
-						cursor.getColumnIndex(Accounts.INCOMING_SECURITY));
-				deleteEmails = cursor.getString(
-						cursor.getColumnIndex(Accounts.DELETE_EMAILS));
-				accountType = cursor.getString(
-						cursor.getColumnIndex(Accounts.ACCOUNT_TYPE));
-				account = new HashMap<String, String>();
-				account.put("address", address);
-				account.put("user", user);
-				account.put("password", password);
-				account.put("deleteEmails", deleteEmails);
-				account.put("provider", accountType);
-				account.put("server", server);
-				account.put("port", port);
-				account.put("security", security);
-				accounts.add(account);
-			} while (cursor.moveToNext());
-			
-		}
-
-		if (accounts.isEmpty() == false) {
+		long interval = getInterval();
+		if (interval != 0) {
 			timer.scheduleAtFixedRate(
 					new TimerTask() { 
 						public void run() {
-							Log.i(TAG, "Watek odpytuje wszystkie konta po kolei.");						
-							for (final HashMap<String, String> accountData : accounts) {
-								Log.i(TAG, "konto " + accountData.get("address"));
-								SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-								long period = settings.getLong(NEW_EMAILS_CHECK, 30L) * 60000;
-								Log.i(TAG, "Co ile odpytuje konta: " + period);
-								timer.scheduleAtFixedRate(
-								new TimerTask() { 
-									public void run() {
-										try {
-											HashMap<String, String> account = accountData;
-											Log.i(TAG,"user " + account.get("user"));
-											Log.i(TAG,"pass " + account.get("password"));
-											String whichMessages = null;
-											receiver = new MailAuthenticator(account, MailAuthenticator.RECEIVE);
-											Map<String, Message> emails = null;
-											SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-											if (accountTypes[1].equals(account.get("provider"))) {
-												whichMessages = settings.getString(account.get("address") + NEW_IMAP_ACCOUNT, null);
-												Log.i(TAG, "co siedzi w " + account.get("address") + NEW_IMAP_ACCOUNT + ": " + whichMessages);
-												if (whichMessages != null && "true".equals(whichMessages)) {
-													whichMessages = null;
-													SharedPreferences.Editor editor = settings.edit();
-													editor.remove(account.get("address") + NEW_IMAP_ACCOUNT);
-													editor.commit();
-													emails = receiver.getMail(null);
-												}
-												else {
-													emails = receiver.getMail(RECENT);
-												}	
-											}
-											else {
-												whichMessages = settings.getString(account.get("address") + POP3_UIDL, "-1");	
-												Log.i(TAG, "co siedzi w " +account.get("address") + POP3_UIDL + ": " + whichMessages);
-												emails = receiver.getMail(whichMessages);
-											}
-											 
-											if (emails != null) {
-												StringBuffer pop3MsgUIDL = new StringBuffer();
-												for (Message email : emails.values()) {
-													ContentValues emailParams = new ContentValues();
-													emailParams.put(Emails.ADDRESSEE, accountData.get("address"));
-													emailParams.put(Emails.SENDER, email.getFrom()[0].toString());
-													emailParams.put(Emails.SUBJECT, email.getSubject().toString());
-													emailParams.put(Emails.CONTENTS, email.getContent().toString());
-													emailParams.put(Emails.RECEIVE_DATE, email.getReceivedDate().toGMTString());
-													
-													dbAdapter.saveEmail(emailParams);
-													if ("IMAP".equals(account.get("provider"))) {
-														email.setFlag(Flags.Flag.SEEN, true);
-													}
-													
-												}	
-												if ("POP3".equals(account.get("provider"))) {
-													for (String UID : emails.keySet()) {
-														pop3MsgUIDL.append(UID + " ");
-														Log.i(TAG, "co siedzi w pop3MsgUIDL " + pop3MsgUIDL);
-													}
-													
-												}
-												if ("".equals(pop3MsgUIDL.toString()) == false) {
-											        SharedPreferences.Editor editor = settings.edit();
-											        editor.putString(account.get("provider") + POP3_UIDL, pop3MsgUIDL.toString());
-											        editor.commit();
-												}
-												
-											}
-											receiver.closeInbox();
-											
-										}
-										catch (MessagingException e) {
-											Log.e(TAG, "MessagingException " + e.getMessage());
-										} 
-										catch (IOException e) {
-											Log.e(TAG, "IOException " + e.getMessage());
-										}
-									}
-								}
-								,0, 1000L);
-							}
+							listen();
 						}
-					}
-					
-			,0, 5000L);		
-			
+					},0, interval);
 		}
 		else {
-			Log.e(TAG, "No accounts with incoming server configured!");
+			listen();
 		}
+		
 		
 	}
 	
 	private void stopCheckForEmails() {
 		stopSelf();
-		Log.i(TAG, "SERVICE MAILLISTENER STOP");
 		if (receiver != null) {
 			receiver.closeInbox();
 		}
@@ -231,9 +120,133 @@ public class MailListener extends Service {
     		dbAdapter.close();
     		dbAdapter = null;
     	}
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(MAIL_LISTENER_RUNNING, false);
-        editor.commit();
 	}
+	
+	private long getInterval() {
+		settings = getSharedPreferences(PREFS_NAME, 0);
+		long interval = settings.getLong(NEW_EMAILS_CHECK, 15L) * 60000;
+		return interval;
+	}	
+	
+	private void listen () {
+		if (dbAdapter == null)
+        	dbAdapter = new DbAdapter(getApplication().getApplicationContext());
+		List<Map<String,String>> accounts = new ArrayList<Map<String,String>>();
+		Cursor cursor = dbAdapter.fetchAccountsToGetMail();
+		
+			Map<String, String> account = null;
+			if (cursor.moveToFirst()) {
+				 do {
+					address = cursor.getString(
+							cursor.getColumnIndex(Accounts.ADDRESS));
+					user = cursor.getString(
+							cursor.getColumnIndex(Accounts.USER));
+					password = cursor.getString(
+							cursor.getColumnIndex(Accounts.PASS));
+					server = cursor.getString(
+							cursor.getColumnIndex(Accounts.INCOMING_SERVER));
+					port = cursor.getString(
+							cursor.getColumnIndex(Accounts.INCOMING_PORT));
+					security = cursor.getString(
+							cursor.getColumnIndex(Accounts.INCOMING_SECURITY));
+					deleteEmails = cursor.getString(
+							cursor.getColumnIndex(Accounts.DELETE_EMAILS));
+					accountType = cursor.getString(
+							cursor.getColumnIndex(Accounts.ACCOUNT_TYPE));
+					account = new HashMap<String, String>();
+					account.put("address", address);
+					account.put("user", user);
+					account.put("password", password);
+					account.put("deleteEmails", deleteEmails);
+					account.put("provider", accountType);
+					account.put("server", server);
+					account.put("port", port);
+					account.put("security", security);
+					
+					accounts.add(account);
+					
+				} while (cursor.moveToNext());
+				
+			}
+
+			else {
+				Log.e(TAG, "No accounts with incoming server configured!");
+			}
+			
+			if (accounts != null && accounts.isEmpty() == false) {
+				for (Map<String,String> accountConf : accounts) {
+					try {
+						String whichMessages = null;
+						receiver = new MailAuthenticator(accountConf, MailAuthenticator.RECEIVE);
+						Map<String, Message> emails = null;		
+						settings = getSharedPreferences(PREFS_NAME, 0);
+						whichMessages = settings.getString(accountConf.get("address") + UIDL, "-1");
+						newEmailsNotification = settings.getBoolean(NEW_EMAILS_NOTIFICATION, true);
+						emails = receiver.getMail(whichMessages);
+						 
+						if (emails != null && emails.isEmpty() == false) {
+							StringBuffer msgsUIDL = new StringBuffer();
+							for (Message email : emails.values()) {
+								ContentValues emailParams = new ContentValues();
+								emailParams.put(Emails.ADDRESSEE, accountConf.get("address"));
+								emailParams.put(Emails.SENDER, email.getFrom()[0].toString());
+								emailParams.put(Emails.SUBJECT, email.getSubject().toString());
+								emailParams.put(Emails.CONTENTS, email.getContent().toString());
+								if (email.getReceivedDate() == null) {
+									Timestamp receiveDate = new Timestamp(new Date().getTime());
+									emailParams.put(Emails.RECEIVE_DATE, receiveDate.toGMTString());
+								}	
+								else {
+									emailParams.put(Emails.RECEIVE_DATE, email.getReceivedDate().toGMTString());
+								}
+								dbAdapter.saveEmail(emailParams);
+																
+							}	
+							if ("-1".equals(whichMessages) == false)
+								msgsUIDL.append(whichMessages.trim() + " ");
+							for (String UID : emails.keySet()) {
+								msgsUIDL.append(UID + " ");
+							}
+							if ("".equals(msgsUIDL.toString()) == false) {
+						        SharedPreferences.Editor editor = settings.edit();
+						        editor.putString(accountConf.get("address") + UIDL, msgsUIDL.toString());
+						        editor.commit();
+							}
+
+							watcher.addObserver((Observer) activity);
+							watcher.notifyAboutNewEmails();
+							if (newEmailsNotification) {
+								showNotification();  
+							}
+						}
+						
+						receiver.closeInbox();
+					}
+					catch (MessagingException e) {
+						Log.e(TAG, "MessagingException " + e);
+					} 
+					catch (IOException e) {
+						Log.e(TAG, "IOException " + e);
+					} 
+				}
+			}
+	}
+	
+	public class InternalWatcher extends Observable {
+		public void notifyAboutNewEmails () {
+			setChanged();
+			notifyObservers();
+		}
+	}
+	
+	private void showNotification() {
+        String notificationContent = (String) getText(R.string.emailsNotifier);
+        mNotificationManager.notify(
+                   NOTIFICATION_ID,
+                   new Notification(
+                	   R.drawable.icon,                
+                	   notificationContent,                 
+                       System.currentTimeMillis()));                 
+    }
 }
+	

@@ -191,7 +191,9 @@ public class MailSender extends Activity {
 			emailData.put(Emails.BCC, bcc.getText().toString());	
 			emailData.put(Emails.SUBJECT, subject.getText().toString());
 			emailData.put(Emails.CONTENTS, contents.getText().toString());
-
+			
+			if (deliverDate == null) 
+				modificationDate = new Timestamp(new Date().getTime());        
 			if(creationDate != null) 
 	    		emailData.put(Emails.CREATE_DATE, creationDate.toGMTString());
 			if(modificationDate != null) 

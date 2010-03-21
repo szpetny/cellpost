@@ -25,8 +25,7 @@ public class AccountConfig extends Activity {
 	private static final String TAG = "AccountConfig";
 	
 	private static final String PREFS_NAME = "CellPostPrefsFile";
-	private static final String POP3_UIDL = "_POP3_UIDL";
-	private static final String NEW_IMAP_ACCOUNT = "_NEW_IMAP_ACCOUNT";
+	private static final String UIDL = "_UIDL";
 	
     private EditText addressText;
     private EditText userText;
@@ -183,7 +182,7 @@ public class AccountConfig extends Activity {
     		accountData.put(Accounts.ADDRESS, addressText.getText().toString());
         	accountData.put(Accounts.USER, userText.getText().toString());
     	    String password = null;
-    	    if (passText.getText() != null && "".equals(passText.getText()) == false) {
+    	    if (passText.getText() != null && "".equals(passText.getText().toString()) == false) {
     	    	password = passText.getText().toString();	
         	    accountData.put(Accounts.PASS, password);//szyfrPassword(password));
     	    }
@@ -208,12 +207,7 @@ public class AccountConfig extends Activity {
                 }
                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
-                if ("POP3".equals(outSecurityAdapter.getItem(outgoingSecurityOption.getSelectedItemPosition()).toString())) {
-                    editor.putString(addressText.getText().toString() + POP3_UIDL, "-1");
-                }
-                if ("IMAP".equals(outSecurityAdapter.getItem(outgoingSecurityOption.getSelectedItemPosition()).toString())) {
-                    editor.putString(addressText.getText().toString() + NEW_IMAP_ACCOUNT, "true");
-                }
+                editor.putString(addressText.getText().toString() + UIDL, "-1");
 		        editor.commit();
             } else {
                 dbAdapter.updateAccount(accountId, accountData);
