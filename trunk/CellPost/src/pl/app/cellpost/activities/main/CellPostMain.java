@@ -1,7 +1,6 @@
 package pl.app.cellpost.activities.main;
 
 import pl.app.cellpost.R;
-import pl.app.cellpost.activities.accounts.AccountsList;
 import pl.app.cellpost.activities.emails.Drafts;
 import pl.app.cellpost.activities.emails.Inbox;
 import pl.app.cellpost.activities.emails.MailSender;
@@ -18,6 +17,8 @@ import android.view.View;
 import android.widget.ListView;
 
 public class CellPostMain extends ListActivity {
+	@SuppressWarnings("unused")
+	private static final String TAG = "CellPostMain";
 	private static final String ACTION_ADD_ACCOUNT = "pl.app.cellpost.ADD_ACCOUNT";
 	private DbAdapter dbAdapter;
 	
@@ -49,7 +50,8 @@ public class CellPostMain extends ListActivity {
         	           }
         	       }).show();
 
-        }        
+        } 
+                
     }
 	
 	@Override
@@ -72,6 +74,7 @@ public class CellPostMain extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        
     }
     
     @Override
@@ -81,6 +84,9 @@ public class CellPostMain extends ListActivity {
     		dbAdapter.close();
     		dbAdapter = null;
     	}
+    	
     }
+    
+    
 
 }

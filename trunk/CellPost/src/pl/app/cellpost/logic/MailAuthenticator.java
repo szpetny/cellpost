@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.FetchProfile;
-import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -20,7 +21,6 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
-import javax.mail.Flags.Flag;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -30,11 +30,11 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.pop3.POP3Folder;
 
 public class MailAuthenticator extends javax.mail.Authenticator {
-	private static final String TAG = "MailAuthenticator";
-	private static final String SSL = "SSL";
-	private static final String NONE = "NONE";
-	private static final String POP3 = "POP3";
-	private static final String IMAP = "IMAP";
+	private final String TAG = "MailAuthenticator";
+	private final String secureModeOn = "SSL/TSL";
+	private final String secureModeOff = "Bez SSL/TSL";
+	private final String POP3 = "POP3";
+	private final String IMAP = "IMAP";
 	
 	public static final String SEND = "SEND";
 	public static final String RECEIVE = "RECEIVE";
@@ -50,11 +50,12 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 	private String deleteEmails = null;
 	
 	private static Map<String,String> receiveProviders;
-	private String[] deleteEmailsOptions = {"Tak ", "Nigdy", "Po usuniêciu ze skrzynki odbiorczej"};
+	private String[] deleteEmailsOptions = {"Tak ", "Nigdy"};
 	
 	private Store store = null;
 	private Folder folder = null, inbox = null;
-	
+	private POP3Folder pop3folder = null;
+	private IMAPFolder imapFolder = null;
 	
 	static {   
 	    Security.addProvider(new JSSEProvider());   
@@ -82,7 +83,7 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 			props.put("mail.smtp.port", port);  
 			props.put("mail.smtp.from", address);   
 			props.put("mail.smtp.socketFactory.port", port);   
-			if (SSL.equals(security)) {
+			if (secureModeOn.equals(security)) {
 				props.put("mail.smtp.socketFactory.class",   
 		          "javax.net.ssl.SSLSocketFactory");   
 				props.put("mail.smtp.socketFactory.fallback", "false");
@@ -99,19 +100,19 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 			provider = (String)accountData.get("provider");
 			deleteEmails = (String) accountData.get("deleteEmails");
 			
-			if (SSL.equals(security) && POP3.equals(provider) 
+			if (secureModeOn.equals(security) && POP3.equals(provider) 
 					&& deleteEmailsOptions[0].equals(deleteEmails)) {
 				props.setProperty("mail.pop3s.rsetbeforequit","true");
 			}
-			else if (SSL.equals(security) && POP3.equals(provider)) {
+			else if (secureModeOn.equals(security) && POP3.equals(provider)) {
 				props.setProperty("mail.pop3s.rsetbeforequit","false");
 			}
 			
-			else if (NONE.equals(security) && POP3.equals(provider) 
+			else if (secureModeOff.equals(security) && POP3.equals(provider) 
 					&& deleteEmailsOptions[0].equals(deleteEmails)) {
 				props.setProperty("mail.pop3.rsetbeforequit","true");
 			}
-			else if (NONE.equals(security) && POP3.equals(provider)) {
+			else if (secureModeOff.equals(security) && POP3.equals(provider)) {
 				props.setProperty("mail.pop3.rsetbeforequit","false");
 			}
 		}
@@ -166,16 +167,16 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 		Message[] allEmails = null;
 		Map<String,Message> unreadEmails = new HashMap<String,Message>();
 		try {
-			if (SSL.equals(security) && POP3.equals(provider)) {
+			if (secureModeOn.equals(security) && POP3.equals(provider)) {
 				store = session.getStore(receiveProviders.get(provider) + "s");
 			}
-			else if (NONE.equals(security) && POP3.equals(provider)) {
+			else if (secureModeOff.equals(security) && POP3.equals(provider)) {
 				store = session.getStore(receiveProviders.get(provider));
 			}
-			else if (SSL.equals(security) && IMAP.equals(provider)) {
+			else if (secureModeOn.equals(security) && IMAP.equals(provider)) {
 				store = session.getStore(receiveProviders.get(provider) + "s");
 			}
-			else if (NONE.equals(security) && IMAP.equals(provider)) {
+			else if (secureModeOff.equals(security) && IMAP.equals(provider)) {
 				store = session.getStore(receiveProviders.get(provider));
 			}
 			store.connect(server, user, password);
@@ -183,10 +184,7 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 			inbox = folder.getFolder("INBOX");
 			
 			inbox.open(Folder.READ_WRITE);
-			
-			POP3Folder pop3folder = null;
-			IMAPFolder imapFolder = null;
-			
+
 			if (POP3.equals(provider)) {
 				pop3folder = (POP3Folder) inbox;
 				allEmails = pop3folder.getMessages();
@@ -199,53 +197,35 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 			FetchProfile fp = new FetchProfile();
 			fp.add(FetchProfile.Item.ENVELOPE); 
 			fp.add(FetchProfile.Item.CONTENT_INFO); 
-			inbox.fetch(allEmails, fp);
-			if (whichMessages == null) {
-				Log.i(TAG, "Nowe konto - zabiera wiadomosci od poczatku");
-				int i = 0;
-				for (Message email : allEmails) {
-					unreadEmails.put(Integer.valueOf(i++).toString(), email);
-				}
-			}
-			else if ( "-1".equals(whichMessages)) {			  
-				  Log.i(TAG, "previousPOP3MsgUIDL " + whichMessages);
-				  for (Message email : allEmails) {
-					  unreadEmails.put(pop3folder.getUID(email), email);
-				  }
-			}
-			else {
-				if ("RECENT".equals(whichMessages)) {
-					for (int i = 0; i < allEmails.length; i++) {
-						Log.i(TAG, "IMAP - recent");
-						Flags.Flag[] flags = 
-							allEmails[i].getFlags().getSystemFlags();
-						if (flags != null) {
-							for (Flag flag : flags) {
-								if (Flags.Flag.RECENT.equals(flag)) {
-									unreadEmails.put(
-									Integer.valueOf(i++).toString(), 
-									allEmails[i]);
-								}
-							}
-						}
-					}
+			if (allEmails != null) {
+				inbox.fetch(allEmails, fp);
+				if ( "-1".equals(whichMessages)) {			  
+					  for (Message email : allEmails) {
+						  if (pop3folder != null)
+							  unreadEmails.put(pop3folder.getUID(email), email);
+						  else
+							  unreadEmails.put((new Long(imapFolder.getUID(email))).toString(), email);  
+					  }
 				}
 				else {
-					  Log.i(TAG, "POP3 - recent :)");
-					  Log.i(TAG, "previousPOP3MsgUIDL " + whichMessages);
-					  String[] previousPOP3MsgUIDL = whichMessages.split(" ");
+					  String[] previousMsgUIDL = whichMessages.split(" ");
+					  List<String> tmpList = new ArrayList<String>();
+					  for (String UID : previousMsgUIDL) 
+						  tmpList.add(UID);
 					  for (Message email : allEmails) {
-						  for (String UID : previousPOP3MsgUIDL) {
-							  if (UID.equals(pop3folder.getUID(email)))
-									  break;
-							  else {
-								  unreadEmails.put(UID, email);
-							  }
+						  if (pop3folder != null) {
+							  if (tmpList.contains(pop3folder.getUID(email)) == false)
+								  unreadEmails.put(pop3folder.getUID(email), email);
+						  }	  
+						  else {
+							  String imapUID = (new Long(imapFolder.getUID(email))).toString();
+							  if (tmpList.contains(imapUID) == false)
+								  unreadEmails.put((new Long(imapFolder.getUID(email))).toString(), email);
 						  }
 					  }
 				}
 			}
-			
+					
 			
 			
 		} catch (NoSuchProviderException e) {
@@ -257,14 +237,46 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 	}
 	
 	public void closeInbox() {
-		if (inbox != null) {
+		if (inbox != null && inbox.isOpen()) {
 			try {
 				inbox.close(true);
-				store.close(); 
+				
 			} catch (MessagingException e) {
 				Log.e(TAG, "MessagingException " + e.getMessage());
 			}
-		}		
+		}
+		if (imapFolder != null && imapFolder.isOpen()) {
+			try {
+				imapFolder.close(true);
+				
+			} catch (MessagingException e) {
+				Log.e(TAG, "MessagingException " + e.getMessage());
+			}
+		}
+		if (pop3folder != null && pop3folder.isOpen()) {
+			try {
+				pop3folder.close(true);
+				
+			} catch (MessagingException e) {
+				Log.e(TAG, "MessagingException " + e.getMessage());
+			}
+		}
+		if (folder != null && folder.isOpen()) {
+			try {
+				folder.close(true);
+				
+			} catch (MessagingException e) {
+				Log.e(TAG, "MessagingException " + e.getMessage());
+			}
+		}
+		if (store != null && store.isConnected()) {
+			try {
+				store.close();
+				
+			} catch (MessagingException e) {
+				Log.e(TAG, "MessagingException " + e.getMessage());
+			}
+		}
 	}
 	
 	public class ByteArrayDataSource implements DataSource {   

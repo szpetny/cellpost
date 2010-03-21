@@ -3,13 +3,15 @@
  */
 package pl.app.cellpost.activities.emails;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import pl.app.cellpost.R;
 import pl.app.cellpost.common.DbAdapter;
 import pl.app.cellpost.common.CellPostInternals.Emails;
 import pl.app.cellpost.services.MailListener;
 import android.app.ListActivity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,19 +29,24 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
  * @author stellmal
  *
  */
-public class Inbox extends ListActivity {
+public class Inbox extends ListActivity implements Observer{
 	private static final String TAG = "Inbox";
-	private static final String PREFS_NAME = "CellPostPrefsFile";
-	private static final String MAIL_LISTENER_RUNNING = "MAIL_LISTENER_RUNNING";
 	private static final String REPLY = "REPLY";
 	private static final String FORWARD = "FORWARD";
 	
     private DbAdapter dbAdapter;
+    private static SimpleCursorAdapter adapter = null;
+    private Cursor c;
     
     // Menu item ids
     public static final int REPLY_ID = Menu.FIRST;
     public static final int FORWARD_ID = Menu.FIRST + 1;
     public static final int DELETE_ID = Menu.FIRST + 2;
+    private static final int REFRESH_ID = Menu.FIRST + 3;
+    
+	private static final int NOTIFICATION_ID = 666;
+	
+	
     
     @Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -78,63 +85,44 @@ public class Inbox extends ListActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		 super.onCreate(savedInstanceState);
-		 if (isServiceRunning() == false) 
-			 setServiceRunning();
-		 
+		 super.onCreate(savedInstanceState); 
 		 if (dbAdapter == null)
-	        	dbAdapter = new DbAdapter(this);		
+	        	dbAdapter = new DbAdapter(this);
+		 MailListener.setMainActivity(this);
+		 startService(new Intent(this, MailListener.class));
 	     setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
+	     if (MailListener.mNotificationManager != null)
+	    	 MailListener.mNotificationManager.cancel(NOTIFICATION_ID); 
 	     listEmails();
 		 
 	}
-	
-	@Override
-    protected void onPause() {
-        super.onPause();
-    }
-    
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (isServiceRunning() == false) 
-			 setServiceRunning();
-    }
-    
+	    
     @Override
     protected void onDestroy() {
     	super.onDestroy();
-    	if (isServiceRunning()) 
-			 setServiceNotRunning();
     	if (dbAdapter != null) {
     		dbAdapter.close();
     		dbAdapter = null;
     	}
     }
     
-    private boolean isServiceRunning() {
-    	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-    	boolean isServiceRunning = settings.getBoolean(MAIL_LISTENER_RUNNING, false);
-    	return isServiceRunning;
-    }
-    
-    private void setServiceRunning() {
-    	startService(new Intent(this, MailListener.class));
-    	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(MAIL_LISTENER_RUNNING, true);
-        editor.commit();
-    }
-    
-    private void setServiceNotRunning() {
-    	stopService(new Intent(this, MailListener.class));
-    	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(MAIL_LISTENER_RUNNING, false);
-        editor.commit();
-        Log.i(TAG, "SERVICE MAILLISTENER STOP");
-    }
-    
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	     super.onCreateOptionsMenu(menu);
+	     menu.add(0, REFRESH_ID, 0, R.string.menu_refresh)
+	         .setIcon(android.R.drawable.ic_menu_upload);	 
+	     return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	     switch(item.getItemId()) {
+	        case REFRESH_ID:
+	        	refreshEmails();
+	            return true;
+	     }
+	     return super.onMenuItemSelected(featureId, item);
+	}
 
     private void deleteEmail(long id) {
 		if (dbAdapter.deleteEmail(id)) {
@@ -147,14 +135,23 @@ public class Inbox extends ListActivity {
 	}
 
 	private void listEmails() {
-		Cursor c = dbAdapter.fetchAllEmailsReceived();
+		c = dbAdapter.fetchAllEmailsReceived();
 		startManagingCursor(c);
 		if (c.moveToFirst()) {
-		    ListAdapter adapter = new SimpleCursorAdapter(this, R.layout.list_single_2lines_row, c,
-		                new String[] {Emails.SENDER, Emails.SUBJECT}, new int[] {R.id.firstValue, R.id.secondValue});
-			setListAdapter(adapter);
+			adapter = new SimpleCursorAdapter(this, R.layout.list_single_3lines_row, c,
+						new String[] {Emails.RECEIVE_DATE, Emails.SENDER, Emails.SUBJECT}, 
+						new int[] {R.id.firstValue, R.id.secondValue, R.id.thirdValue});
+			setListAdapter((ListAdapter)adapter);
 			registerForContextMenu(getListView());
 		}
+		
+	}
+	
+	private void refreshEmails() {
+		c.requery();
+		adapter.notifyDataSetChanged();
+		setListAdapter((ListAdapter)adapter);
+		registerForContextMenu(getListView());
 	}
 
 	private void forwardTo(long id) {
@@ -169,5 +166,9 @@ public class Inbox extends ListActivity {
         intent.putExtra(Emails._ID, id);
         intent.putExtra(REPLY, REPLY);
         startActivity(intent);	
+	}
+
+	public void update(Observable observable, Object object) {
+		refreshEmails();
 	}
 }

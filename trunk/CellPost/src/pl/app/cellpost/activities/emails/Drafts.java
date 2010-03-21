@@ -89,12 +89,11 @@ public class Drafts extends ListActivity {
 	    }
 	    
 		private void deleteEmail(long emailId) {
-			DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 			if (dbAdapter.deleteEmail(emailId)) {
 				listEmails();
 			}
 			else {
-				Log.e(TAG, "Operation of deleting a draft email failed!");
+				Log.e(TAG, "Operation of deleting account failed!");
 			}
 			
 		}
@@ -112,8 +111,9 @@ public class Drafts extends ListActivity {
 				Cursor c = dbAdapter.fetchAllDrafts();
 				startManagingCursor(c);
 				if (c.moveToFirst()) {
-					ListAdapter adapter = new  SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.list_single_2lines_row, 
-							c, new String[]{Emails.ADDRESSEE, Emails.SUBJECT}, new int[] {R.id.firstValue, R.id.secondValue});
+					ListAdapter adapter = new  SimpleCursorAdapter (this, R.layout.list_single_3lines_row, 
+							c, new String[]{Emails.MODIFY_DATE, Emails.ADDRESSEE, Emails.SUBJECT}, 
+							new int[] {R.id.firstValue, R.id.secondValue, R.id.thirdValue});
 					setListAdapter(adapter);
 					registerForContextMenu(getListView());
 				}

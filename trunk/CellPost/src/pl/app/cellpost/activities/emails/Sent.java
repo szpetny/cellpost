@@ -91,12 +91,11 @@ public class Sent extends ListActivity {
 	    }
 	    
 		private void deleteSent(long emailId) {
-			DbAdapter dbAdapter = new DbAdapter(getApplication().getApplicationContext());
 			if (dbAdapter.deleteEmail(emailId)) {
 				listSent();
 			}
 			else {
-				Log.e(TAG, "Operation of deleting a sent email failed!");
+				Log.e(TAG, "Operation of deleting account failed!");
 			}
 			
 		}
@@ -115,8 +114,9 @@ public class Sent extends ListActivity {
 				Cursor c = dbAdapter.fetchAllSent();
 				startManagingCursor(c);
 				if (c.moveToFirst()) {
-					ListAdapter adapter = new  SimpleCursorAdapter (getApplication().getApplicationContext(), R.layout.list_single_2lines_row, 
-							c, new String[]{Emails.ADDRESSEE, Emails.SUBJECT}, new int[] {R.id.firstValue, R.id.secondValue});
+					ListAdapter adapter = new  SimpleCursorAdapter (this, R.layout.list_single_3lines_row, 
+							c, new String[]{Emails.DELIVER_DATE, Emails.ADDRESSEE, Emails.SUBJECT}, 
+							new int[] {R.id.firstValue, R.id.secondValue, R.id.thirdValue});
 					setListAdapter(adapter);
 					registerForContextMenu(getListView());
 				}

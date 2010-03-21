@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		style="@style/CellPostFormLayoutStyle">
+	<TextView android:id="@+id/firstValue"
+	    style="@style/CellPostListItemDateStyle"/>
+	<TextView android:id="@+id/secondValue" 
+	    style="@style/CellPostListItemStyle"
+	    android:layout_below="@id/firstValue"/>
+	<TextView android:id="@+id/thirdValue" 
+	    style="@style/CellPostListItemStyle"
+	    android:layout_below="@id/secondValue"/>
+</RelativeLayout>
