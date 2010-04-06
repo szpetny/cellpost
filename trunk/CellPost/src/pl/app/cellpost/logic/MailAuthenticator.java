@@ -138,21 +138,27 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 		    message.setDataHandler(handler);   
 		    if ("".equals(to) == false)
 		    	if (to.indexOf(',') > 0)   
-			        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));   
+			        message.setRecipients(Message.RecipientType.TO, 
+			        		InternetAddress.parse(to));   
 			    else  
-			        message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));   
+			        message.setRecipient(Message.RecipientType.TO, 
+			        		new InternetAddress(to));   
 		    
 		    if ("".equals(cc) == false)
 			    if (cc.indexOf(',') > 0)   
-			        message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(cc));   
+			        message.setRecipients(Message.RecipientType.CC, 
+			        		InternetAddress.parse(cc));   
 			    else  
-			        message.setRecipient(Message.RecipientType.CC, new InternetAddress(cc));   
+			        message.setRecipient(Message.RecipientType.CC, 
+			        		new InternetAddress(cc));   
 		    
 		    if ("".equals(bcc) == false)
 			    if (bcc.indexOf(',') > 0)   
-			        message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(bcc));   
+			        message.setRecipients(Message.RecipientType.BCC, 
+			        		InternetAddress.parse(bcc));   
 			    else  
-			        message.setRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));   
+			        message.setRecipient(Message.RecipientType.BCC, 
+			        		new InternetAddress(bcc));   
 		    
 		    Transport.send(message);   
 		    return true;
@@ -200,11 +206,14 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 			if (allEmails != null) {
 				inbox.fetch(allEmails, fp);
 				if ( "-1".equals(whichMessages)) {			  
-					  for (Message email : allEmails) {
-						  if (pop3folder != null)
-							  unreadEmails.put(pop3folder.getUID(email), email);
-						  else
-							  unreadEmails.put((new Long(imapFolder.getUID(email))).toString(), email);  
+					for (Message email : allEmails) {
+						if (pop3folder != null)
+						   unreadEmails.put(
+							 pop3folder.getUID(email), email);
+						else
+						   unreadEmails.put(
+						     (new Long(imapFolder.getUID(email))).toString(), 
+						     email);  
 					  }
 				}
 				else {
@@ -213,15 +222,20 @@ public class MailAuthenticator extends javax.mail.Authenticator {
 					  for (String UID : previousMsgUIDL) 
 						  tmpList.add(UID);
 					  for (Message email : allEmails) {
-						  if (pop3folder != null) {
-							  if (tmpList.contains(pop3folder.getUID(email)) == false)
-								  unreadEmails.put(pop3folder.getUID(email), email);
-						  }	  
-						  else {
-							  String imapUID = (new Long(imapFolder.getUID(email))).toString();
-							  if (tmpList.contains(imapUID) == false)
-								  unreadEmails.put((new Long(imapFolder.getUID(email))).toString(), email);
-						  }
+						if (pop3folder != null) {
+						  if (!tmpList.contains(pop3folder.getUID(email)))
+								unreadEmails.put(
+								   pop3folder.getUID(email), 
+								   email);
+						}	  
+						else {
+							String imapUID = (
+									new Long(imapFolder.getUID(email))).toString();
+							if (tmpList.contains(imapUID) == false)
+								unreadEmails.put(
+									(new Long(imapFolder.getUID(email))).toString(), 
+									email);
+						}
 					  }
 				}
 			}
