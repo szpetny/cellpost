@@ -138,9 +138,14 @@ public class Inbox extends ListActivity implements Observer{
 		c = dbAdapter.fetchAllEmailsReceived();
 		startManagingCursor(c);
 		if (c.moveToFirst()) {
-			adapter = new SimpleCursorAdapter(this, R.layout.list_single_3lines_row, c,
-						new String[] {Emails.RECEIVE_DATE, Emails.SENDER, Emails.SUBJECT}, 
-						new int[] {R.id.firstValue, R.id.secondValue, R.id.thirdValue});
+			adapter = new SimpleCursorAdapter(this, 
+						R.layout.list_single_3lines_row, c,
+						new String[] {Emails.RECEIVE_DATE, 
+									  Emails.SENDER, 
+									  Emails.SUBJECT}, 
+						new int[] {R.id.firstValue, 
+								   R.id.secondValue, 
+								   R.id.thirdValue});
 			setListAdapter((ListAdapter)adapter);
 			registerForContextMenu(getListView());
 		}

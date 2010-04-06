@@ -11,7 +11,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -107,9 +106,9 @@ public class DbAdapter {
 
 
 	/**
-	* Create a new account using the values provided in ContentValues. If the account is
-	* successfully created return the new accountId for that account, otherwise return
-	* a -1 to indicate failure.
+	* Create a new account using the values provided in ContentValues. 
+	* If the account is successfully created return the new accountId 
+	* for that account, otherwise return -1 to indicate failure.
 	*
 	* @param ContentValues containing account parameters
 	* @return accountId or -1 if failed
@@ -228,7 +227,7 @@ public class DbAdapter {
 		Cursor c = fetchDefaultAccount();
 		if (c.moveToFirst()) {
 			if (accountParams.get(Accounts.DEFAULT) != null 
-					&& "true".equals(accountParams.get(Accounts.DEFAULT).toString())) {
+				&& "true".equals(accountParams.get(Accounts.DEFAULT).toString())){
 				ContentValues defaultParam = new ContentValues();
 				defaultParam.put(Accounts.DEFAULT, "false");
 				db.update(Accounts.TABLE_NAME, defaultParam, 
@@ -239,30 +238,6 @@ public class DbAdapter {
 			accountParams.put(Accounts.DEFAULT, "true");
 		}
 		c.close();
-	}
-	
-	/**
-	* Checks uniqueness of given account
-	* 
-	* @param accountName the value which uniqueness needs to be checked
-	* @return true if the value is unique, false otherwise
-	*/
-	public boolean checkUnique(String accountName) {
-			Cursor c = null;
-			try {
-				c = db.rawQuery("SELECT _ID, ADDRESS FROM accounts WHERE ADDRESS = %s", 
-						new String[] {accountName}); 				
-			} catch (SQLiteException sqle) {
-				throw new SQLException("CHUJ!");
-			}
-			if (c == null) {
-				return true;
-			}				
-			else {
-				c.close();
-				return false;
-			}			
-		
 	}
 	
 	/**
@@ -284,7 +259,8 @@ public class DbAdapter {
 	* @return true if deleted, false otherwise
 	*/
 	public boolean deleteEmail(long emailId) {	
-		return db.delete(Emails.TABLE_NAME, Emails._ID + "=" + emailId, null) > 0;
+		return db.delete(Emails.TABLE_NAME, 
+				Emails._ID + "=" + emailId, null) > 0;
 	}
 	
 	/**
@@ -313,7 +289,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAllSent() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
-				Emails.DELIVER_DATE + " is not null ", null, null, null, Emails.DELIVER_DATE + " DESC");
+				Emails.DELIVER_DATE + " is not null ", 
+				null, null, null, Emails.DELIVER_DATE + " DESC");
 	}
 	
 	/**
@@ -324,7 +301,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAllEmailsReceived() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
-				Emails.RECEIVE_DATE + " is not null ", null, null, null, Emails.RECEIVE_DATE + " DESC");
+				Emails.RECEIVE_DATE + " is not null ", 
+				null, null, null, Emails.RECEIVE_DATE + " DESC");
 	}
 	
 	/**
@@ -334,8 +312,8 @@ public class DbAdapter {
 	*/
 	public Cursor fetchAllDrafts() {
 		return db.query(Emails.TABLE_NAME, new String[] {"*"}, 
-				Emails.RECEIVE_DATE + " is null AND " + 
-				Emails.DELIVER_DATE + " is null ", null, null, null, Emails.MODIFY_DATE + " DESC");
+				Emails.MODIFY_DATE + " is not null ", 
+				null, null, null, Emails.MODIFY_DATE + " DESC");
 	}
 
 	/**

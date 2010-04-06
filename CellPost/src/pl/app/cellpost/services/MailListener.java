@@ -138,21 +138,21 @@ public class MailListener extends Service{
 			if (cursor.moveToFirst()) {
 				 do {
 					address = cursor.getString(
-							cursor.getColumnIndex(Accounts.ADDRESS));
+						cursor.getColumnIndex(Accounts.ADDRESS));
 					user = cursor.getString(
-							cursor.getColumnIndex(Accounts.USER));
+						cursor.getColumnIndex(Accounts.USER));
 					password = cursor.getString(
-							cursor.getColumnIndex(Accounts.PASS));
+						cursor.getColumnIndex(Accounts.PASS));
 					server = cursor.getString(
-							cursor.getColumnIndex(Accounts.INCOMING_SERVER));
+						cursor.getColumnIndex(Accounts.INCOMING_SERVER));
 					port = cursor.getString(
-							cursor.getColumnIndex(Accounts.INCOMING_PORT));
+						cursor.getColumnIndex(Accounts.INCOMING_PORT));
 					security = cursor.getString(
-							cursor.getColumnIndex(Accounts.INCOMING_SECURITY));
+						cursor.getColumnIndex(Accounts.INCOMING_SECURITY));
 					deleteEmails = cursor.getString(
-							cursor.getColumnIndex(Accounts.DELETE_EMAILS));
+						cursor.getColumnIndex(Accounts.DELETE_EMAILS));
 					accountType = cursor.getString(
-							cursor.getColumnIndex(Accounts.ACCOUNT_TYPE));
+						cursor.getColumnIndex(Accounts.ACCOUNT_TYPE));
 					account = new HashMap<String, String>();
 					account.put("address", address);
 					account.put("user", user);
@@ -177,29 +177,39 @@ public class MailListener extends Service{
 				for (Map<String,String> accountConf : accounts) {
 					try {
 						String whichMessages = null;
-						receiver = new MailAuthenticator(accountConf, MailAuthenticator.RECEIVE);
+						receiver = new MailAuthenticator(accountConf, 
+								MailAuthenticator.RECEIVE);
 						Map<String, Message> emails = null;		
 						settings = getSharedPreferences(PREFS_NAME, 0);
-						whichMessages = settings.getString(accountConf.get("address") + UIDL, "-1");
-						newEmailsNotification = settings.getBoolean(NEW_EMAILS_NOTIFICATION, true);
+						whichMessages = settings.getString(
+								accountConf.get("address") + UIDL, "-1");
+						newEmailsNotification = settings.getBoolean(
+								NEW_EMAILS_NOTIFICATION, true);
 						emails = receiver.getMail(whichMessages);
 						 
 						if (emails != null && emails.isEmpty() == false) {
-							StringBuffer msgsUIDL = new StringBuffer();
-							for (Message email : emails.values()) {
-								ContentValues emailParams = new ContentValues();
-								emailParams.put(Emails.ADDRESSEE, accountConf.get("address"));
-								emailParams.put(Emails.SENDER, email.getFrom()[0].toString());
-								emailParams.put(Emails.SUBJECT, email.getSubject().toString());
-								emailParams.put(Emails.CONTENTS, email.getContent().toString());
-								if (email.getReceivedDate() == null) {
-									Timestamp receiveDate = new Timestamp(new Date().getTime());
-									emailParams.put(Emails.RECEIVE_DATE, receiveDate.toGMTString());
-								}	
-								else {
-									emailParams.put(Emails.RECEIVE_DATE, email.getReceivedDate().toGMTString());
-								}
-								dbAdapter.saveEmail(emailParams);
+						  StringBuffer msgsUIDL = new StringBuffer();
+						  for (Message email : emails.values()) {
+							ContentValues emailParams = new ContentValues();
+							emailParams.put(Emails.ADDRESSEE, 
+									accountConf.get("address"));
+							emailParams.put(Emails.SENDER, 
+									email.getFrom()[0].toString());
+							emailParams.put(Emails.SUBJECT, 
+									email.getSubject().toString());
+							emailParams.put(Emails.CONTENTS, 
+									email.getContent().toString());
+							if (email.getReceivedDate() == null) {
+								Timestamp receiveDate = new Timestamp(
+										new Date().getTime());
+								emailParams.put(Emails.RECEIVE_DATE, 
+										receiveDate.toGMTString());
+							}	
+							else {
+								emailParams.put(Emails.RECEIVE_DATE, 
+										email.getReceivedDate().toGMTString());
+							}
+							dbAdapter.saveEmail(emailParams);
 																
 							}	
 							if ("-1".equals(whichMessages) == false)
@@ -209,7 +219,8 @@ public class MailListener extends Service{
 							}
 							if ("".equals(msgsUIDL.toString()) == false) {
 						        SharedPreferences.Editor editor = settings.edit();
-						        editor.putString(accountConf.get("address") + UIDL, msgsUIDL.toString());
+						        editor.putString(accountConf.get("address") 
+						        		+ UIDL, msgsUIDL.toString());
 						        editor.commit();
 							}
 

@@ -33,8 +33,8 @@ public class CellPostMain extends ListActivity {
         Cursor	cursor = dbAdapter.fetchAllAccounts();
         startManagingCursor(cursor);
         if (!cursor.moveToFirst()) {
-        	new AlertDialog.Builder(this).setMessage("There is no configured e-mail account. " +
-        			" Do you want to configure your e-mail now?")
+        	new AlertDialog.Builder(this).setMessage("Brak skonfigurowanych kont email. " +
+        			" Czy chcesz teraz dodaæ nowe?")
         	       .setCancelable(false)
         	       .setPositiveButton("Yes", 
         	    	   new DialogInterface.OnClickListener() {
