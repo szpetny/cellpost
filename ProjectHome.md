@@ -1,0 +1,1 @@
+This is a little experimental project which main purpose is enable me start, complete and finish my master’s thesis and by the way discover android platform creating useful tool to e-mails management using a mobile phone instead of PC
